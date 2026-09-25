@@ -20,24 +20,21 @@ body{margin:0;font-family:Georgia,serif;background:#1a120b;color:#d4af37;display
 <script>
 (async function(){
   try{
-    const res = await fetch('app.b64?v=1');
-    if(!res.ok) throw new Error('Failed to fetch app data ('+res.status+')');
-    const b64 = (await res.text()).trim();
+    const [r1,r2] = await Promise.all([fetch('app.b64.1?v=2'), fetch('app.b64.2?v=2')]);
+    if(!r1.ok||!r2.ok) throw new Error('Failed to fetch app data');
+    const b64 = ((await r1.text())+(await r2.text())).trim();
     const bin = atob(b64);
     const bytes = new Uint8Array(bin.length);
     for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
     if(typeof DecompressionStream==='undefined')
-      throw new Error('Please use Chrome, Edge, Firefox or Safari (DecompressionStream required).');
+      throw new Error('Please use Chrome, Edge, Firefox or Safari.');
     const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
     const html = await new Response(stream).text();
-    document.open();
-    document.write(html);
-    document.close();
+    document.open(); document.write(html); document.close();
   }catch(e){
     console.error(e);
     document.getElementById('loader').innerHTML =
-      '<p style="color:#f44336">Failed to load.</p><p style="font-size:14px;color:#a89880">'+(e.message||e)+'</p>'+
-      '<p style="margin-top:1rem;font-size:13px"><a style="color:#d4af37" href="https://github.com/pbwsantu-collab/three-questions-tolstoy-pwa">GitHub</a></p>';
+      '<p style="color:#f44336">Failed to load.</p><p style="font-size:14px;color:#a89880">'+(e.message||e)+'</p>';
   }
 })();
 </script>
