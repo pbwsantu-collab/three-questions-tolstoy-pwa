@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="theme-color" content="#8B6914">
+<meta name="description" content="Interactive bilingual English literature tutor for Leo Tolstoy's Three Questions. Read, Listen, Learn with Bengali support.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Three Questions — Leo Tolstoy | A Realm of English (B)</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E📖%3C/text%3E%3C/svg%3E">
+<style>
+/* ========== CSS VARIABLES & RESET ========== */
+:root {
+  --bg: #f7f1e8;
+  --bg-paper: #faf6f0;
+  --text: #2c2416;
+  --text-muted: #6b5d4d;
+  --accent: #8B6914;
+  --accent-light: #c9a227;
+  --gold: #d4af37;
+  --card: #ffffff;
+  --border: #e0d5c5;
+  --highlight: rgba(212,175,55,0.35);
+  --highlight-word: rgba(139,105,20,0.45);
+  --shadow: 0 4px 20px rgba(44,36,22,0.08);
+  --radius: 12px;
+  --font-size: 17px;
+  --line-height: 1.75;
+  --max-width: 720px;
+  --nav-h: 56px;
+  --player-h: 64px;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+[data-theme="dark"] {
+  --bg: #1a120b;
+  --bg-paper: #241a12;
+  --text: #f0e6d6;
+  --text-muted: #a89880;
+  --card: #2c2118;
+  --border: #3d3025;
+  --shadow: 0 4px 20px rgba(0,0,0,0.35);
+  --highlight: rgba(212,175,55,0.25);
+  --highlight-word: rgba(212,175,55,0.4);
+}
+[data-theme="sepia"] {
+  --bg: #f4ecd8;
+  --bg-paper: #f8f1e0;
+  --text: #5c4b32;
+  --text-muted: #8a7660;
+  --card: #faf6eb;
+  --border: #e5d9c0;
+}
+[data-theme="contrast"] {
+  --bg: #000;
+  --bg-paper: #111;
+  --text: #fff;
+  --text-muted: #ccc;
+  --card: #1a1a1a;
+  --border: #444;
+  --accent: #ffd700;
+  --highlight: rgba(255,215,0,0.4);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{
+  font-family: Georgia, 'Times New Roman', serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: var(--font-size);
+  line-height: var(--line-height);
+  min-height: 100vh;
+  padding-bottom: calc(var(--player-h) + var(--safe-bottom) + 16px);
+  transition: background .3s, color .3s;
+}
+button,input,select{font-family:inherit}
+a{color:var(--accent)}
+img{max-width:100%}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+/* ========== TOP NAV ========== */
+.top-nav{
+  position:sticky;top:0;z-index:100;
+  height:var(--nav-h);
+  background:rgba(26,18,11,0.92);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 12px;
+  border-bottom:1px solid rgba(212,175,55,0.25);
+}
+.nav-brand{
+  font-size:15px;font-weight:700;color:var(--gold);
+  letter-spacing:.02em;white-space:nowrap;
+}
+.nav-brand span{font-weight:400;opacity:.7;font-size:12px;margin-left:6px}
+.nav-links{display:none;gap:2px}
+.nav-links a,.nav-links button{
+  background:none;border:none;color:#e8dcc8;
+  padding:8px 10px;border-radius:8px;font-size:13px;
+  cursor:pointer;text-decoration:none;
+  transition:background .2s,color .2s;
+}
+.nav-links a:hover,.nav-links a.active,
+.nav-links button:hover{background:rgba(212,175,55,0.2);color:var(--gold)}
+.hamburger{
+  display:flex;flex-direction:column;gap:5px;
+  background:none;border:none;padding:10px;cursor:pointer;
+}
+.hamburger span{display:block;width:22px;height:2px;background:#e8dcc8;border-radius:1px;transition:transform .3s}
+.drawer{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,0.5);
+  opacity:0;visibility:hidden;transition:opacity .3s,visibility .3s;
+}
+.drawer.open{opacity:1;visibility:visible}
+.drawer-panel{
+  position:absolute;top:0;right:0;width:min(300px,85vw);height:100%;
+  background:var(--card);padding:24px 16px;
+  transform:translateX(100%);transition:transform .3s;
+  overflow-y:auto;
+}
+.drawer.open .drawer-panel{transform:translateX(0)}
+.drawer-panel a,.drawer-panel button{
+  display:block;width:100%;text-align:left;
+  background:none;border:none;color:var(--text);
+  padding:14px 12px;border-radius:10px;font-size:16px;
+  cursor:pointer;text-decoration:none;margin-bottom:4px;
+}
+.drawer-panel a:hover,.drawer-panel button:hover{background:var(--border)}
+.drawer-close{position:absolute;top:12px;right:12px;font-size:24px;background:none;border:none;color:var(--text-muted);cursor:pointer}
+
+@media(min-width:900px){
+  .hamburger{display:none}
+  .nav-links{display:flex}
+}
+
+/* ========== LANDING ========== */
+.landing{
+  min-height:100vh;
+  background:linear-gradient(160deg,#0f0a06 0%,#1a120b 40%,#2a1c0e 100%);
+  color:#f0e6d6;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:40px 20px 100px;
+  position:relative;overflow:hidden;
+}
+.landing::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse at 30% 20%,rgba(212,175,55,0.12),transparent 50%),
+             radial-gradient(ellipse at 70% 80%,rgba(139,105,20,0.08),transparent 50%);
+  pointer-events:none;
+}
+.book-3d{
+  width:120px;height:90px;margin:0 auto 28px;
+  perspective:800px;position:relative;
+}
+.book-inner{
+  width:100%;height:100%;
+  transform-style:preserve-3d;
+  animation:floatBook 6s ease-in-out infinite;
+}
+@keyframes floatBook{
+  0%,100%{transform:rotateY(-18deg) rotateX(8deg) translateY(0)}
+  50%{transform:rotateY(-12deg) rotateX(5deg) translateY(-12px)}
+}
+.book-cover{
+  position:absolute;inset:0;
+  background:linear-gradient(135deg,#8B6914,#5c4a0e);
+  border-radius:4px 12px 12px 4px;
+  box-shadow:8px 12px 30px rgba(0,0,0,0.5),inset -4px 0 12px rgba(0,0,0,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:42px;
+}
+.book-pages{
+  position:absolute;top:4px;right:4px;bottom:4px;left:8px;
+  background:#f5f0e6;border-radius:2px 8px 8px 2px;
+  transform:translateZ(-6px);
+}
+.particles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.particle{
+  position:absolute;width:4px;height:4px;background:var(--gold);
+  border-radius:50%;opacity:0.4;
+  animation:rise 8s linear infinite;
+}
+@keyframes rise{
+  0%{transform:translateY(100vh) scale(0);opacity:0}
+  10%{opacity:0.5}
+  90%{opacity:0.3}
+  100%{transform:translateY(-20px) scale(1);opacity:0}
+}
+.landing h1{
+  font-size:clamp(2rem,8vw,3.4rem);
+  font-weight:700;letter-spacing:0.04em;
+  background:linear-gradient(135deg,#f5e6c8,#d4af37,#c9a227);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;margin-bottom:8px;
+}
+.landing .subtitle{font-size:1.25rem;color:#c9b896;margin-bottom:6px}
+.landing .tagline{font-size:0.95rem;color:#a89880;margin-bottom:28px;letter-spacing:0.08em}
+.badge{
+  display:inline-block;padding:6px 14px;
+  background:rgba(212,175,55,0.15);border:1px solid rgba(212,175,55,0.35);
+  border-radius:20px;font-size:12px;color:var(--gold);margin-bottom:32px;
+}
+.btn-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:14px 28px;border-radius:50px;font-size:15px;font-weight:600;
+  border:none;cursor:pointer;transition:transform .2s,box-shadow .2s;
+  text-decoration:none;
+}
+.btn:active{transform:scale(0.97)}
+.btn-primary{
+  background:linear-gradient(135deg,#c9a227,#8B6914);
+  color:#1a120b;box-shadow:0 4px 20px rgba(212,175,55,0.35);
+}
+.btn-primary:hover{box-shadow:0 6px 28px rgba(212,175,55,0.5)}
+.btn-secondary{
+  background:rgba(255,255,255,0.08);color:#f0e6d6;
+  border:1px solid rgba(212,175,55,0.4);
+}
+.btn-secondary:hover{background:rgba(255,255,255,0.14)}
+.quote-cards{
+  display:flex;flex-wrap:wrap;gap:12px;justify-content:center;
+  margin-top:48px;max-width:700px;
+}
+.quote-card{
+  background:rgba(255,255,255,0.06);
+  backdrop-filter:blur(8px);
+  border:1px solid rgba(212,175,55,0.2);
+  border-radius:12px;padding:16px 18px;
+  font-size:13px;color:#c9b896;max-width:200px;
+  transform:translateY(0);transition:transform .3s;
+}
+.quote-card:hover{transform:translateY(-4px)}
+
+/* ========== MAIN APP LAYOUT ========== */
+.app-section{display:none;padding:20px 16px 40px;max-width:var(--max-width);margin:0 auto}
+.app-section.active{display:block}
+.section-title{
+  font-size:1.4rem;font-weight:700;color:var(--accent);
+  margin-bottom:16px;padding-bottom:8px;
+  border-bottom:2px solid var(--border);
+}
+
+/* ========== STORY CONTENT ========== */
+.story-meta{margin-bottom:28px}
+.story-meta h2{font-size:1.5rem;margin-bottom:12px;color:var(--accent)}
+.about-block{
+  background:var(--card);border-radius:var(--radius);
+  padding:18px 20px;margin-bottom:16px;
+  border:1px solid var(--border);box-shadow:var(--shadow);
+}
+.about-block h3{font-size:1.05rem;color:var(--accent);margin-bottom:8px}
+.about-block p{font-size:0.95rem;color:var(--text-muted);margin-bottom:8px}
+.about-block p:last-child{margin-bottom:0}
+
+.paragraph{
+  position:relative;
+  background:var(--bg-paper);
+  border-radius:var(--radius);
+  padding:18px 20px;
+  margin-bottom:18px;
+  border:1px solid var(--border);
+  transition:box-shadow .3s,border-color .3s;
+}
+.paragraph.active-para{
+  border-color:var(--accent);
+  box-shadow:0 0 0 2px var(--highlight);
+}
+.paragraph.reading-highlight{
+  background:var(--highlight);
+}
+.para-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:10px;gap:8px;flex-wrap:wrap;
+}
+.para-num{
+  font-size:12px;font-weight:600;color:var(--accent);
+  background:rgba(139,105,20,0.12);padding:3px 10px;border-radius:12px;
+}
+.para-actions{display:flex;gap:6px;flex-wrap:wrap}
+.para-btn{
+  background:none;border:1px solid var(--border);
+  color:var(--text-muted);font-size:12px;padding:4px 10px;
+  border-radius:16px;cursor:pointer;transition:all .2s;
+}
+.para-btn:hover,.para-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.para-text{font-size:var(--font-size);line-height:var(--line-height)}
+.para-bn{
+  display:none;margin-top:14px;padding-top:14px;
+  border-top:1px dashed var(--border);
+  font-size:0.95rem;color:var(--text-muted);
+  font-family:'Noto Sans Bengali',system-ui,sans-serif;
+  line-height:1.7;
+}
+.para-bn.show{display:block}
+.word{
+  cursor:pointer;border-radius:3px;padding:0 1px;
+  transition:background .15s;
+}
+.word:hover,.word:focus{background:var(--highlight);outline:none}
+.word.known{border-bottom:2px solid rgba(76,175,80,0.5)}
+.word.difficult{border-bottom:2px solid rgba(244,67,54,0.4)}
+.footnote-ref{
+  font-size:0.7em;vertical-align:super;color:var(--accent);
+  cursor:pointer;font-weight:700;margin-left:1px;
+}
+.footnote-ref:hover{text-decoration:underline}
+
+/* ========== VOCAB POPUP ========== */
+.vocab-popup{
+  position:fixed;z-index:300;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:14px;padding:16px 18px;
+  box-shadow:0 12px 40px rgba(0,0,0,0.2);
+  max-width:300px;width:90vw;
+  opacity:0;visibility:hidden;transform:translateY(8px);
+  transition:opacity .2s,transform .2s,visibility .2s;
+}
+.vocab-popup.show{opacity:1;visibility:visible;transform:translateY(0)}
+.vocab-popup .word-en{font-size:1.25rem;font-weight:700;color:var(--accent);margin-bottom:4px}
+.vocab-popup .word-bn{font-size:1.1rem;margin-bottom:2px;font-family:'Noto Sans Bengali',system-ui,sans-serif}
+.vocab-popup .word-pron{font-size:0.85rem;color:var(--text-muted);margin-bottom:6px}
+.vocab-popup .word-pos{font-size:0.8rem;color:var(--accent-light);margin-bottom:8px}
+.vocab-popup .word-ctx{font-size:0.85rem;color:var(--text-muted);font-style:italic;margin-bottom:12px}
+.vocab-popup .popup-actions{display:flex;gap:8px}
+.popup-btn{
+  flex:1;padding:8px;border-radius:8px;border:1px solid var(--border);
+  background:var(--bg);color:var(--text);font-size:13px;cursor:pointer;
+}
+.popup-btn:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ========== BOTTOM PLAYER ========== */
+.player{
+  position:fixed;bottom:0;left:0;right:0;z-index:90;
+  height:calc(var(--player-h) + var(--safe-bottom));
+  background:rgba(26,18,11,0.95);
+  backdrop-filter:blur(12px);
+  border-top:1px solid rgba(212,175,55,0.25);
+  display:flex;align-items:center;justify-content:center;
+  padding:0 8px var(--safe-bottom);
+  gap:4px;
+}
+.player button,.player select{
+  background:none;border:none;color:#e8dcc8;
+  padding:10px;font-size:18px;cursor:pointer;border-radius:8px;
+  min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;
+}
+.player button:hover{background:rgba(212,175,55,0.2);color:var(--gold)}
+.player button:disabled{opacity:0.35;cursor:default}
+.player .speed-sel{
+  font-size:12px;color:#c9b896;padding:6px 4px;
+  background:rgba(255,255,255,0.06);border-radius:6px;border:1px solid rgba(212,175,55,0.2);
+}
+.player .bn-toggle{
+  font-size:12px;padding:6px 10px;
+  background:rgba(212,175,55,0.15);border-radius:16px;
+  color:var(--gold);border:1px solid rgba(212,175,55,0.3);
+}
+
+/* ========== VOCABULARY SECTION ========== */
+.vocab-search{
+  width:100%;padding:12px 16px;border-radius:10px;
+  border:1px solid var(--border);background:var(--card);
+  color:var(--text);font-size:15px;margin-bottom:16px;
+}
+.vocab-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.filter-btn{
+  padding:6px 14px;border-radius:20px;border:1px solid var(--border);
+  background:var(--card);color:var(--text-muted);font-size:13px;cursor:pointer;
+}
+.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.vocab-list{display:grid;gap:10px}
+.vocab-item{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:10px;padding:14px 16px;
+  display:grid;grid-template-columns:1fr auto;gap:8px;
+  align-items:start;
+}
+.vocab-item .v-word{font-weight:700;color:var(--accent)}
+.vocab-item .v-bn{font-family:'Noto Sans Bengali',system-ui,sans-serif}
+.vocab-item .v-meta{font-size:12px;color:var(--text-muted)}
+.vocab-item .v-actions{display:flex;gap:6px}
+.v-act{
+  background:none;border:1px solid var(--border);border-radius:6px;
+  padding:4px 8px;font-size:12px;cursor:pointer;color:var(--text-muted);
+}
+.v-act:hover,.v-act.saved{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ========== QUIZ ========== */
+.quiz-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:20px;margin-bottom:16px;
+  box-shadow:var(--shadow);
+}
+.quiz-q{font-size:1.05rem;font-weight:600;margin-bottom:14px}
+.quiz-opts{display:grid;gap:8px}
+.quiz-opt{
+  padding:12px 16px;border-radius:10px;border:1px solid var(--border);
+  background:var(--bg);cursor:pointer;text-align:left;font-size:15px;
+  transition:all .2s;
+}
+.quiz-opt:hover{border-color:var(--accent)}
+.quiz-opt.selected{border-color:var(--accent);background:var(--highlight)}
+.quiz-opt.correct{border-color:#4caf50;background:rgba(76,175,80,0.15)}
+.quiz-opt.wrong{border-color:#f44336;background:rgba(244,67,54,0.12)}
+.quiz-feedback{margin-top:12px;padding:10px;border-radius:8px;font-size:14px;display:none}
+.quiz-feedback.show{display:block}
+.quiz-feedback.ok{background:rgba(76,175,80,0.15);color:#2e7d32}
+.quiz-feedback.bad{background:rgba(244,67,54,0.12);color:#c62828}
+.quiz-nav{display:flex;justify-content:space-between;margin-top:20px;gap:12px}
+.quiz-score{
+  text-align:center;padding:24px;background:var(--card);
+  border-radius:var(--radius);border:1px solid var(--border);
+}
+
+/* ========== PROGRESS / DASHBOARD ========== */
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+.dash-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:18px;text-align:center;
+  box-shadow:var(--shadow);
+}
+.dash-card .num{font-size:1.8rem;font-weight:700;color:var(--accent)}
+.dash-card .label{font-size:13px;color:var(--text-muted);margin-top:4px}
+
+/* ========== SETTINGS ========== */
+.settings-group{margin-bottom:24px}
+.settings-group h3{font-size:1rem;margin-bottom:12px;color:var(--accent)}
+.setting-row{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 0;border-bottom:1px solid var(--border);
+}
+.setting-row label{font-size:15px}
+.setting-row input[type="range"]{width:120px}
+.theme-btns{display:flex;gap:8px;flex-wrap:wrap}
+.theme-btn{
+  padding:8px 14px;border-radius:8px;border:1px solid var(--border);
+  background:var(--card);cursor:pointer;font-size:13px;
+}
+.theme-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ========== SEARCH ========== */
+.search-bar-wrap{position:relative;margin-bottom:16px}
+.search-bar{
+  width:100%;padding:12px 16px 12px 42px;border-radius:10px;
+  border:1px solid var(--border);background:var(--card);color:var(--text);font-size:15px;
+}
+.search-icon{position:absolute;left:14px;top:50%;transform:translateY(-50%);opacity:.5}
+.search-results{margin-top:12px}
+.search-hit{
+  padding:12px;border-radius:8px;border:1px solid var(--border);
+  background:var(--card);margin-bottom:8px;cursor:pointer;
+}
+.search-hit:hover{border-color:var(--accent)}
+.search-hit mark{background:var(--highlight);padding:0 2px}
+
+/* ========== FOOTNOTE MODAL ========== */
+.modal-overlay{
+  position:fixed;inset:0;z-index:400;
+  background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;
+  opacity:0;visibility:hidden;transition:opacity .2s;
+}
+.modal-overlay.show{opacity:1;visibility:visible}
+.modal{
+  background:var(--card);border-radius:14px;padding:24px;
+  max-width:340px;width:90%;box-shadow:0 20px 50px rgba(0,0,0,0.3);
+}
+.modal h3{margin-bottom:8px;color:var(--accent)}
+.modal p{margin-bottom:16px;color:var(--text-muted)}
+.modal button{
+  width:100%;padding:10px;border:none;border-radius:8px;
+  background:var(--accent);color:#fff;font-weight:600;cursor:pointer;
+}
+
+/* ========== PROGRESS BAR ========== */
+.progress-bar-wrap{
+  position:sticky;top:var(--nav-h);z-index:50;
+  height:3px;background:var(--border);
+}
+.progress-bar{height:100%;background:var(--accent);width:0%;transition:width .3s}
+
+/* ========== UTIL ========== */
+.hidden{display:none!important}
+.mt-1{margin-top:8px}.mt-2{margin-top:16px}.mb-2{margin-bottom:16px}
+.text-center{text-align:center}
+.muted{color:var(--text-muted);font-size:0.9rem}
+
+/* Print */
+@media print{
+  .top-nav,.player,.hamburger,.drawer,.btn-row,.para-actions,.landing{display:none!important}
+  body{padding:0;background:#fff;color:#000}
+  .paragraph{break-inside:avoid;border:none;padding:8px 0}
+  .app-section{display:block!important}
+}
+</style>
+</head>
+<body>
+
+<!-- ========== TOP NAV ========== -->
+<nav class="top-nav" role="navigation" aria-label="Main">
+  <div class="nav-brand">THREE QUESTIONS <span>Tolstoy</span></div>
+  <div class="nav-links" id="navLinks">
+    <a href="#" data-section="landing">🏠 Home</a>
+    <a href="#" data-section="read">📖 Read</a>
+    <a href="#" data-section="listen">🎧 Listen</a>
+    <a href="#" data-section="learn">🧠 Learn</a>
+    <a href="#" data-section="vocab">📚 Vocab</a>
+    <a href="#" data-section="quiz">❓ Quiz</a>
+    <a href="#" data-section="progress">📊 Progress</a>
+    <a href="#" data-section="settings">⚙ Settings</a>
+  </div>
+  <button class="hamburger" id="hamburger" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="drawer" id="drawer">
+  <div class="drawer-panel">
+    <button class="drawer-close" id="drawerClose" aria-label="Close">×</button>
+    <a href="#" data-section="landing">🏠 Home</a>
+    <a href="#" data-section="read">📖 Read</a>
+    <a href="#" data-section="listen">🎧 Listen</a>
+    <a href="#" data-section="learn">🧠 Learn</a>
+    <a href="#" data-section="vocab">📚 Vocabulary</a>
+    <a href="#" data-section="quiz">❓ Quiz</a>
+    <a href="#" data-section="progress">📊 Progress</a>
+    <a href="#" data-section="settings">⚙ Settings</a>
+    <a href="#" data-section="search">🔍 Search</a>
+    <a href="#" data-section="bookmarks">🔖 Bookmarks</a>
+  </div>
+</div>
+
+<div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+
+<!-- ========== LANDING ========== -->
+<section class="landing" id="section-landing">
+  <div class="particles" id="particles"></div>
+  <div class="book-3d">
+    <div class="book-inner">
+      <div class="book-pages"></div>
+      <div class="book-cover">📖</div>
+    </div>
+  </div>
+  <div class="badge">A Realm of English (B)</div>
+  <h1>THREE QUESTIONS</h1>
+  <p class="subtitle">Leo Tolstoy</p>
+  <p class="tagline">Read · Listen · Understand · Learn</p>
+  <div class="btn-row">
+    <button class="btn btn-primary" data-section="read">START READING</button>
+    <button class="btn btn-secondary" data-section="listen">LISTEN TO STORY</button>
+    <button class="btn btn-secondary" data-section="vocab">LEARN VOCABULARY</button>
+  </div>
+  <div class="quote-cards">
+    <div class="quote-card">“There is only one time that is important — now!”</div>
+    <div class="quote-card">The most necessary person is the one with whom you are.</div>
+    <div class="quote-card">The most important affair is to do him good.</div>
+  </div>
+</section>
+
+<!-- ========== READ / LISTEN / LEARN (shared content) ========== -->
+<section class="app-section" id="section-read">
+  <div class="story-meta">
+    <h2>Three Questions</h2>
+    <p class="muted">Leo Tolstoy · A Realm of English (B) · Pages 168–172</p>
+  </div>
+
+  <div class="about-block" id="sec-author">
+    <h3>About the Author</h3>
+    <p>Lev (Leo) Tolstoy, (1828-1910)—a Russian writer, philosopher, and social thinker, was widely regarded as one of the greatest novelists of all time. His masterpieces, <em>War and Peace</em> (1869) and <em>Anna Karenina</em> (1877), are celebrated for their psychological depth, historical accuracy, and profound philosophical insights.</p>
+    <p>Tolstoy's early works, such as <em>Childhood, Boyhood, and Youth</em> (1852-1856) and <em>Sevastopol Sketches</em> (1855), reflect his personal experiences and observations of war. However, he later underwent a spiritual transformation, leading to his advocacy of pacifism, Christian anarchism, and simple living, as seen in <em>The Kingdom of God Is Within You</em> (1894). His later fiction, including <em>The Death of Ivan Ilyich</em> (1886) and <em>Resurrection</em> (1899), critiques social injustice and explores existential themes.</p>
+    <p>Tolstoy's ideas on nonviolence influenced leaders like Mahatma Gandhi and Martin Luther King Jr. Despite conflicts with the Russian Orthodox Church, his moral and literary legacy remains unparalleled in world literature.</p>
+  </div>
+
+  <div class="about-block" id="sec-text">
+    <h3>About the Text</h3>
+    <p>"Three Questions" is a short story by Leo Tolstoy, first published in 1885 as part of his collection <em>What Men Live By, and Other Tales</em>. Through the tale of a Tsar who wanted to know the nature of appropriate counsel and action, Tolstoy reveals an illuminating notion about the duties of Man. This simple tale is loaded with deep thoughts on the way human beings should conduct their actions. The story reflects Tolstoy's philosophical and moral beliefs, particularly his ideas on wisdom, time, and human responsibility.</p>
+  </div>
+
+  <h3 class="section-title" id="sec-story">THREE QUESTIONS</h3>
+  <div id="storyContainer"></div>
+</section>
+
+<!-- Listen & Learn reuse the same container via JS mode -->
+<section class="app-section" id="section-listen">
+  <h2 class="section-title">🎧 Listen Mode</h2>
+  <p class="muted mb-2">Audio-focused reading with automatic highlighting. Use the bottom player controls.</p>
+  <div id="listenContainer"></div>
+</section>
+
+<section class="app-section" id="section-learn">
+  <h2 class="section-title">🧠 Learn Mode</h2>
+  <p class="muted mb-2">English sentence + important words + Bengali meaning + translation.</p>
+  <div id="learnContainer"></div>
+</section>
+
+<!-- ========== VOCABULARY ========== -->
+<section class="app-section" id="section-vocab">
+  <h2 class="section-title">📚 Vocabulary</h2>
+  <input type="search" class="vocab-search" id="vocabSearch" placeholder="Search English or Bengali…" aria-label="Search vocabulary">
+  <div class="vocab-filters">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="difficult">Difficult</button>
+    <button class="filter-btn" data-filter="saved">Favourites</button>
+    <button class="filter-btn" data-filter="learned">Learned</button>
+  </div>
+  <div class="vocab-list" id="vocabList"></div>
+</section>
+
+<!-- ========== QUIZ ========== -->
+<section class="app-section" id="section-quiz">
+  <h2 class="section-title">❓ Quiz</h2>
+  <div id="quizArea">
+    <div class="quiz-card">
+      <p class="muted">Test your understanding of the story. At least 20 questions covering comprehension, vocabulary and themes.</p>
+      <button class="btn btn-primary mt-2" id="startQuiz">Start Quiz</button>
+    </div>
+  </div>
+</section>
+
+<!-- ========== PROGRESS ========== -->
+<section class="app-section" id="section-progress">
+  <h2 class="section-title">📊 Learning Dashboard</h2>
+  <div class="dash-grid" id="dashGrid">
+    <div class="dash-card"><div class="num" id="statWords">0</div><div class="label">Words Learned</div></div>
+    <div class="dash-card"><div class="num" id="statParas">0</div><div class="label">Paragraphs Read</div></div>
+    <div class="dash-card"><div class="num" id="statListen">0%</div><div class="label">Listening Progress</div></div>
+    <div class="dash-card"><div class="num" id="statQuiz">—</div><div class="label">Quiz Best Score</div></div>
+    <div class="dash-card"><div class="num" id="statStreak">0</div><div class="label">Reading Streak</div></div>
+  </div>
+</section>
+
+<!-- ========== SETTINGS ========== -->
+<section class="app-section" id="section-settings">
+  <h2 class="section-title">⚙ Settings</h2>
+  <div class="settings-group">
+    <h3>Appearance</h3>
+    <div class="setting-row">
+      <label>Theme</label>
+      <div class="theme-btns">
+        <button class="theme-btn active" data-theme="light">Light</button>
+        <button class="theme-btn" data-theme="dark">Dark</button>
+        <button class="theme-btn" data-theme="sepia">Sepia</button>
+        <button class="theme-btn" data-theme="contrast">High Contrast</button>
+      </div>
+    </div>
+    <div class="setting-row">
+      <label for="fontSize">Font size</label>
+      <input type="range" id="fontSize" min="14" max="24" value="17">
+    </div>
+    <div class="setting-row">
+      <label for="lineHeight">Line spacing</label>
+      <input type="range" id="lineHeight" min="1.4" max="2.2" step="0.1" value="1.75">
+    </div>
+  </div>
+  <div class="settings-group">
+    <h3>Reading</h3>
+    <div class="setting-row">
+      <label for="bnSupport">Bengali support</label>
+      <input type="checkbox" id="bnSupport" checked>
+    </div>
+    <div class="setting-row">
+      <label for="vocabHighlight">Vocabulary highlighting</label>
+      <input type="checkbox" id="vocabHighlight" checked>
+    </div>
+    <div class="setting-row">
+      <label for="autoScroll">Auto-scroll while listening</label>
+      <input type="checkbox" id="autoScroll" checked>
+    </div>
+    <div class="setting-row">
+      <label for="reducedMotion">Reduced motion</label>
+      <input type="checkbox" id="reducedMotion">
+    </div>
+  </div>
+  <div class="settings-group">
+    <h3>Data</h3>
+    <button class="btn btn-secondary" id="resetProgress">Reset all progress</button>
+  </div>
+</section>
+
+<!-- ========== SEARCH ========== -->
+<section class="app-section" id="section-search">
+  <h2 class="section-title">🔍 Search</h2>
+  <div class="search-bar-wrap">
+    <span class="search-icon">🔍</span>
+    <input type="search" class="search-bar" id="globalSearch" placeholder="Search words, phrases, Bengali meanings…">
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</section>
+
+<!-- ========== BOOKMARKS ========== -->
+<section class="app-section" id="section-bookmarks">
+  <h2 class="section-title">🔖 Bookmarks</h2>
+  <div id="bookmarksList"><p class="muted">No bookmarks yet. Tap 🔖 on any paragraph while reading.</p></div>
+</section>
+
+<!-- ========== BOTTOM PLAYER ========== -->
+<div class="player" id="player" role="region" aria-label="Reading controls">
+  <button id="btnPrev" aria-label="Previous paragraph" title="Previous">⏮</button>
+  <button id="btnPlay" aria-label="Play" title="Play">▶</button>
+  <button id="btnPause" aria-label="Pause" title="Pause" class="hidden">⏸</button>
+  <button id="btnStop" aria-label="Stop" title="Stop">⏹</button>
+  <button id="btnNext" aria-label="Next paragraph" title="Next">⏭</button>
+  <select class="speed-sel" id="speedSel" aria-label="Speed">
+    <option value="0.75">0.75x</option>
+    <option value="0.85" selected>0.85x</option>
+    <option value="1">1x</option>
+    <option value="1.25">1.25x</option>
+    <option value="1.5">1.5x</option>
+  </select>
+  <button class="bn-toggle" id="bnGlobalToggle" title="Toggle Bengali translations">বাংলা অর্থ</button>
+</div>
+
+<!-- ========== VOCAB POPUP ========== -->
+<div class="vocab-popup" id="vocabPopup" role="dialog" aria-modal="true">
+  <div class="word-en" id="vpWord"></div>
+  <div class="word-bn" id="vpBn"></div>
+  <div class="word-pron" id="vpPron"></div>
+  <div class="word-pos" id="vpPos"></div>
+  <div class="word-ctx" id="vpCtx"></div>
+  <div class="popup-actions">
+    <button class="popup-btn" id="vpSpeak">🔊 Pronounce</button>
+    <button class="popup-btn" id="vpSave">📌 Save</button>
+  </div>
+</div>
+
+<!-- ========== FOOTNOTE MODAL ========== -->
+<div class="modal-overlay" id="fnModal">
+  <div class="modal">
+    <h3 id="fnTitle"></h3>
+    <p id="fnBody"></p>
+    <button id="fnClose">Close</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   THREE QUESTIONS — Leo Tolstoy  |  Educational PWA
+   Vanilla JS · Offline-first · Bengali support
+   ============================================================ */
+
+(function () {
+  'use strict';
+
+  // ---------- DATA: COMPLETE TEXT (exact textbook) ----------
+  const PARAGRAPHS = [
+    {
+      id: 'p001',
+      section: 'story',
+      en: `It once occurred to a certain Tsar¹, that if he always knew the right time to begin everything; if he knew who were the right people to listen to, and whom to avoid; and, above all, if he always knew what was the most important thing to do, he would never fail in anything he might undertake.`,
+      bn: `একজন জারের একদিন মনে হয়েছিল যে, যদি তিনি সবসময় জানতেন কখন কোন কাজ শুরু করতে হবে; কাকে কথা শুনতে হবে আর কাদের এড়িয়ে চলতে হবে; এবং সর্বোপরি, কোন কাজটি সবচেয়ে গুরুত্বপূর্ণ—তাহলে তিনি যাই করতেন, তাতে ব্যর্থ হতেন না।`
+    },
+    {
+      id: 'p002',
+      section: 'story',
+      en: `And this thought having occurred to him, he had it proclaimed throughout his kingdom that he would give a great reward to anyone who would teach him what was the right time for every action, and who were the most necessary people, and how he might know what was the most important thing to do.`,
+      bn: `এই চিন্তা তাঁর মনে আসার পর তিনি সারা রাজ্যে ঘোষণা করালেন যে, কেউ যদি তাঁকে শেখাতে পারে প্রতিটি কাজের সঠিক সময় কী, সবচেয়ে প্রয়োজনীয় লোক কারা, এবং সবচেয়ে গুরুত্বপূর্ণ কাজ কীভাবে জানা যায়—তাকে তিনি বড় পুরস্কার দেবেন।`
+    },
+    {
+      id: 'p003',
+      section: 'story',
+      en: `And learned men came to the Tsar, but they all answered his questions differently.`,
+      bn: `বিদ্বান লোকেরা জারের কাছে এলেন, কিন্তু তাঁরা সবাই তাঁর প্রশ্নের ভিন্ন ভিন্ন উত্তর দিলেন।`
+    },
+    {
+      id: 'p004',
+      section: 'story',
+      en: `In reply to the first question, some said that to know the right time for every action, one must draw up in advance a table of days, months, and years, and must live strictly according to it. Only thus, said they, could everything be done at its proper time.`,
+      bn: `প্রথম প্রশ্নের উত্তরে কেউ কেউ বললেন, প্রতিটি কাজের সঠিক সময় জানতে হলে আগে থেকে দিন, মাস ও বছরের একটি তালিকা তৈরি করে সেই অনুসারে কঠোরভাবে চলতে হবে। শুধু এভাবেই সবকিছু তার সঠিক সময়ে করা যায়।`
+    },
+    {
+      id: 'p005',
+      section: 'story',
+      en: `Others declared that it was impossible to decide beforehand the right time for every action; but that, not letting oneself be absorbed in idle pastimes, one should always attend to all that was going on, and then do what was most needful. Others, again, said that however attentive the Tsar might be to what was going on, it was impossible for one man to decide correctly the right time for every action, but that he should have a council of wise men, who would help him to fix the proper time for everything.`,
+      bn: `অন্যরা বললেন, আগে থেকে প্রতিটি কাজের সঠিক সময় ঠিক করা অসম্ভব; বরং অলস কাজে মগ্ন না হয়ে চারপাশে যা ঘটছে তাতে মনোযোগ দিয়ে সবচেয়ে প্রয়োজনীয় কাজটি করতে হবে। আবার কেউ বললেন, জার যতই মনোযোগী হন না কেন, একজন মানুষের পক্ষে সব কাজের সঠিক সময় ঠিক করা অসম্ভব; তাই তাঁর উচিত জ্ঞানীদের একটি পরিষদ রাখা যারা তাঁকে সাহায্য করবে।`
+    },
+    {
+      id: 'p006',
+      section: 'story',
+      en: `But then again others said there were some things which could not wait to be laid before a council, but about which one had at once to decide whether to undertake them or not. But in order to decide that, one must know beforehand what was going to happen. It is only magicians who know that; and, therefore, in order to know the right time for every action, one must consult magicians.`,
+      bn: `আবার কেউ বললেন, কিছু কাজ আছে যা পরিষদের সামনে তোলার অপেক্ষা করা যায় না—তাৎক্ষণিক সিদ্ধান্ত নিতে হয়। সেজন্য আগে থেকে জানতে হবে কী ঘটতে চলেছে। এটা শুধু জাদুকররাই জানে; তাই প্রতিটি কাজের সঠিক সময় জানতে জাদুকরদের পরামর্শ নিতে হবে।`
+    },
+    {
+      id: 'p007',
+      section: 'story',
+      en: `Equally various were the answers to the second question. Some said the people the Tsar most needed were his councillors; others, the priests; others, the doctors; while some said the warriors were the most necessary.`,
+      bn: `দ্বিতীয় প্রশ্নের উত্তরও তেমনি বিভিন্ন রকমের ছিল। কেউ বললেন জারের সবচেয়ে প্রয়োজনীয় লোক তাঁর উপদেষ্টারা; কেউ বললেন পুরোহিতরা; কেউ চিকিৎসকরা; আবার কেউ বললেন যোদ্ধারাই সবচেয়ে প্রয়োজনীয়।`
+    },
+    {
+      id: 'p008',
+      section: 'story',
+      en: `To the third question, as to what was the most important occupation: some replied that the most important thing in the world was science. Others said it was skill in warfare; and others, again, that it was religious worship.`,
+      bn: `তৃতীয় প্রশ্নের উত্তরে—কোন কাজ সবচেয়ে গুরুত্বপূর্ণ—কেউ বললেন বিজ্ঞান; কেউ বললেন যুদ্ধবিদ্যা; আবার কেউ বললেন ধর্মীয় উপাসনা।`
+    },
+    {
+      id: 'p009',
+      section: 'story',
+      en: `All the answers being different, the Tsar agreed with none of them, and gave the reward to none. But still wishing to find the right answers to his questions, he decided to consult a hermit, widely renowned for his wisdom.`,
+      bn: `সব উত্তর আলাদা হওয়ায় জার কারো সাথেই একমত হলেন না এবং কাউকে পুরস্কারও দিলেন না। কিন্তু সঠিক উত্তর জানার ইচ্ছা তবুও ছিল, তাই তিনি একজন সন্ন্যাসীর সাথে পরামর্শ করার সিদ্ধান্ত নিলেন, যিনি তাঁর জ্ঞানের জন্য সুপরিচিত ছিলেন।`
+    },
+    {
+      id: 'p010',
+      section: 'story',
+      en: `The hermit lived in a wood which he never quitted, and he received none but common folk. So the Tsar put on simple clothes and, before reaching the hermit's cell, dismounted² from his horse and, leaving his bodyguard behind, he went on alone.`,
+      bn: `সন্ন্যাসী একটি জঙ্গলে থাকতেন যা তিনি কখনো ছাড়তেন না, এবং সাধারণ লোক ছাড়া আর কাউকে দেখা করতেন না। তাই জার সাদামাটা পোশাক পরে, সন্ন্যাসীর কুটিরে পৌঁছানোর আগে ঘোড়া থেকে নেমে, রক্ষীদের পেছনে রেখে একাই এগিয়ে গেলেন।`
+    },
+    {
+      id: 'p011',
+      section: 'story',
+      en: `When the Tsar approached, the hermit was digging the ground in front of his hut. Seeing the Tsar, he greeted him and went on digging. The hermit was frail and weak, and each time he stuck his spade into the ground and turned a little earth, he breathed heavily.`,
+      bn: `জার কাছে এলে দেখলেন সন্ন্যাসী তাঁর কুটিরের সামনে মাটি খুঁড়ছেন। জারকে দেখে তিনি অভিবাদন জানিয়ে আবার খোঁড়া শুরু করলেন। সন্ন্যাসী দুর্বল ও ক্ষীণকায় ছিলেন; প্রতিবার কোদাল মাটিতে ফেলে একটু মাটি উল্টাতেই তিনি ভারী শ্বাস ফেলতেন।`
+    },
+    {
+      id: 'p012',
+      section: 'story',
+      en: `The Tsar went up to him and said: "I have come to you, wise hermit, to ask you to answer three questions: How can I learn to do the right thing at the right time? Who are the people I most need, and to whom should I, therefore, pay more attention than to the rest? And, what affairs are the most important and need my first attention?"`,
+      bn: `জার তাঁর কাছে গিয়ে বললেন: “হে জ্ঞানী সন্ন্যাসী, আমি আপনার কাছে এসেছি তিনটি প্রশ্নের উত্তর জানতে: কীভাবে আমি সঠিক সময়ে সঠিক কাজ করতে শিখব? কোন লোকেরা আমার সবচেয়ে প্রয়োজনীয়, যাদের প্রতি আমাকে বেশি মনোযোগ দিতে হবে? এবং কোন কাজগুলো সবচেয়ে গুরুত্বপূর্ণ ও আমার প্রথম মনোযোগের দাবিদার?”`
+    },
+    {
+      id: 'p013',
+      section: 'story',
+      en: `The hermit listened to the Tsar, but answered nothing. He just spat on his hand and recommenced digging.`,
+      bn: `সন্ন্যাসী জারের কথা শুনলেন, কিন্তু কিছুই বললেন না। তিনি শুধু হাতে থুথু দিয়ে আবার খোঁড়া শুরু করলেন।`
+    },
+    {
+      id: 'p014',
+      section: 'story',
+      en: `"You are tired," said the Tsar, "let me take the spade and work awhile for you."`,
+      bn: `“আপনি ক্লান্ত,” জার বললেন, “আমাকে কোদালটি দিন, আমি একটু আপনার হয়ে কাজ করি।”`
+    },
+    {
+      id: 'p015',
+      section: 'story',
+      en: `"Thanks!" said the hermit, and, giving the spade to the Tsar, he sat down on the ground.`,
+      bn: `“ধন্যবাদ!” সন্ন্যাসী বললেন, এবং কোদালটি জারকে দিয়ে মাটিতে বসে পড়লেন।`
+    },
+    {
+      id: 'p016',
+      section: 'story',
+      en: `When he had dug two beds, the Tsar stopped and repeated his questions. The hermit again gave no answer, but rose, stretched out his hand for the spade, and said: "Now rest awhile — and let me work a bit."`,
+      bn: `দুইটি বিছানা খুঁড়ে জার থামলেন এবং আবার প্রশ্নগুলো করলেন। সন্ন্যাসী আবার উত্তর দিলেন না; উঠে দাঁড়িয়ে কোদালের জন্য হাত বাড়িয়ে বললেন: “এবার একটু বিশ্রাম নিন—আমাকেও একটু কাজ করতে দিন।”`
+    },
+    {
+      id: 'p017',
+      section: 'story',
+      en: `But the Tsar did not give him the spade, and continued to dig. One hour passed, and another. The sun began to sink behind the trees, and the Tsar at last stuck the spade into the ground, and said:`,
+      bn: `কিন্তু জার কোদাল দিলেন না, খুঁড়তেই থাকলেন। এক ঘণ্টা গেল, আরেক ঘণ্টা। সূর্য গাছের আড়ালে ডুবতে শুরু করল। অবশেষে জার কোদাল মাটিতে পুঁতে বললেন:`
+    },
+    {
+      id: 'p018',
+      section: 'story',
+      en: `"I came to you, wise man, for an answer to my questions. If you can give me none, tell me so, and I will return home."`,
+      bn: `“আমি আপনার কাছে এসেছি আমার প্রশ্নের উত্তরের জন্য, হে জ্ঞানী। যদি দিতে না পারেন, বলুন—আমি বাড়ি ফিরে যাব।”`
+    },
+    {
+      id: 'p019',
+      section: 'story',
+      en: `"Here comes someone running," said the hermit. "Let us see who it is."`,
+      bn: `“কেউ দৌড়ে আসছে,” সন্ন্যাসী বললেন। “দেখি কে।”`
+    },
+    {
+      id: 'p020',
+      section: 'story',
+      en: `The Tsar turned round and saw a bearded man come running out of the wood. The man held his hands pressed against his stomach, and blood was flowing from under them. When he reached the Tsar, he fell fainting on the ground, moaning feebly. The Tsar and the hermit unfastened the man's clothing. There was a large wound in his stomach. The Tsar washed it as best he could, and bandaged it with his handkerchief and with a towel the hermit had. But the blood would not stop flowing, and the Tsar again and again removed the bandage soaked with warm blood, and washed and re-bandaged the wound. When at last the blood ceased flowing, the man revived and asked for something to drink. The Tsar brought fresh water and gave it to him. Meanwhile the sun had set, and it had become cool. So the Tsar, with the hermit's help, carried the wounded man into the hut and laid him on the bed. Lying on the bed, the man closed his eyes and was quiet; but the Tsar was so tired from his walk and from the work he had done that he crouched down on the threshold, and also fell asleep — so soundly that he slept all through the short summer night.`,
+      bn: `জার ঘুরে দেখলেন এক দাড়িওয়ালা লোক জঙ্গল থেকে দৌড়ে আসছে। সে পেটে হাত চেপে ধরে আছে, হাতের নিচ দিয়ে রক্ত বেরোচ্ছে। জারের কাছে এসে সে অজ্ঞান হয়ে মাটিতে পড়ে গেল, দুর্বলভাবে আর্তনাদ করতে করতে। জার ও সন্ন্যাসী তার কাপড় খুললেন। পেটে বড় ক্ষত। জার যথাসাধ্য ধুয়ে নিজের রুমাল ও সন্ন্যাসীর তোয়ালে দিয়ে ব্যান্ডেজ করলেন। কিন্তু রক্ত থামছিল না। বারবার রক্তভেজা ব্যান্ডেজ খুলে ধুয়ে আবার বাঁধতে হলো। অবশেষে রক্ত থামলে লোকটি জ্ঞান ফিরে পেয়ে পানীয় চাইল। জার তাজা জল এনে দিলেন। ইতিমধ্যে সূর্য ডুবে গেছে, ঠান্ডা পড়েছে। জার সন্ন্যাসীর সাহায্যে আহত লোকটিকে কুটিরে নিয়ে বিছানায় শোয়ালেন। বিছানায় শুয়ে লোকটি চোখ বন্ধ করে শান্ত হয়ে গেল; কিন্তু জার হাঁটা ও কাজের ক্লান্তিতে দোরগোড়ায় গুটিসুটি মেরে ঘুমিয়ে পড়লেন—এত গভীর ঘুম যে গোটা ছোট গ্রীষ্মের রাতটাই ঘুমালেন।`
+    },
+    {
+      id: 'p021',
+      section: 'story',
+      en: `When he awoke in the morning, it was long before he could remember where he was, or who was the strange bearded man lying on the bed and gazing intently at him with shining eyes.`,
+      bn: `সকালে জেগে উঠে অনেকক্ষণ তিনি মনে করতে পারলেন না তিনি কোথায় আছেন, বা বিছানায় শোয়া সেই অদ্ভুত দাড়িওয়ালা লোকটি কে, যে উজ্জ্বল চোখে তাঁর দিকে তাকিয়ে আছে।`
+    },
+    {
+      id: 'p022',
+      section: 'story',
+      en: `"Forgive me!" said the bearded man in a weak voice, when he saw that the Tsar was awake and was looking at him.`,
+      bn: `“আমাকে ক্ষমা করুন!” দাড়িওয়ালা লোকটি দুর্বল গলায় বলল, যখন দেখল জার জেগে উঠে তার দিকে তাকিয়ে আছেন।`
+    },
+    {
+      id: 'p023',
+      section: 'story',
+      en: `"I do not know you, and have nothing to forgive you for," said the Tsar.`,
+      bn: `“আমি আপনাকে চিনি না, এবং ক্ষমা করার মতো কিছুই নেই,” জার বললেন।`
+    },
+    {
+      id: 'p024',
+      section: 'story',
+      en: `"You do not know me, but I know you. I am that enemy of yours who swore to revenge himself on you, because you executed³ his brother and seized his property. I knew you had gone alone to see the hermit, and I resolved⁴ to kill you on your way back. But the day passed and you did not return. So I came out from my ambush⁵ to find you, and came upon your bodyguard, and they recognized me, and wounded me. I escaped from them, but should have bled to death had you not dressed my wound. I wished to kill you, and you have saved my life. Now, if I live, and if you wish it, I will serve you as your most faithful slave, and will bid my sons do the same. Forgive me!"`,
+      bn: `“আপনি আমাকে চেনেন না, কিন্তু আমি আপনাকে চিনি। আমি আপনার সেই শত্রু, যে আপনার ওপর প্রতিশোধ নেবে বলে শপথ করেছিল, কারণ আপনি তার ভাইকে মৃত্যুদণ্ড দিয়েছিলেন এবং সম্পত্তি কেড়ে নিয়েছিলেন। আমি জানতাম আপনি একা সন্ন্যাসীর কাছে গেছেন, এবং ফেরার পথে আপনাকে হত্যা করার সিদ্ধান্ত নিয়েছিলাম। কিন্তু দিন চলে গেল, আপনি ফিরলেন না। তাই আমি আমার ওঁত পাতা জায়গা থেকে বেরিয়ে আপনাকে খুঁজতে এসে আপনার রক্ষীদের সম্মুখীন হলাম। তারা আমাকে চিনে ফেলে আহত করল। আমি পালিয়ে গেলাম, কিন্তু আপনি ক্ষত না বাঁধলে রক্তক্ষরণে মারা যেতাম। আমি আপনাকে মারতে চেয়েছিলাম, আর আপনি আমার প্রাণ বাঁচালেন। এখন যদি আমি বাঁচি, এবং আপনি চান, আমি আপনার সবচেয়ে বিশ্বস্ত দাস হয়ে থাকব, এবং আমার ছেলেদেরও তাই বলব। আমাকে ক্ষমা করুন!”`
+    },
+    {
+      id: 'p025',
+      section: 'story',
+      en: `The Tsar was very glad to have made peace with his enemy so easily, and to have gained him for a friend, and he not only forgave him, but said he would send his servants and his own physician to attend him, and promised to restore his property.`,
+      bn: `জার খুব খুশি হলেন যে এত সহজে শত্রুর সাথে শান্তি স্থাপন করতে পারলেন এবং তাকে বন্ধু হিসেবে পেলেন। তিনি শুধু ক্ষমাই করলেন না, বরং বললেন তিনি নিজের চাকর ও চিকিৎসক পাঠাবেন তার সেবায়, এবং সম্পত্তি ফিরিয়ে দেবেন বলেও প্রতিশ্রুতি দিলেন।`
+    },
+    {
+      id: 'p026',
+      section: 'story',
+      en: `Having taken leave of the wounded man, the Tsar went out into the porch and looked around for the hermit. Before going away he wished once more to beg an answer to the questions he had put. The hermit was outside, on his knees, sowing seeds in the beds that had been dug the day before.`,
+      bn: `আহত লোকটির কাছ থেকে বিদায় নিয়ে জার বারান্দায় এসে সন্ন্যাসীকে খুঁজলেন। যাওয়ার আগে আর একবার প্রশ্নগুলোর উত্তর চাইতে চাইলেন। সন্ন্যাসী বাইরে হাঁটু গেড়ে আগের দিন খোঁড়া বিছানাগুলোতে বীজ বুনছিলেন।`
+    },
+    {
+      id: 'p027',
+      section: 'story',
+      en: `The Tsar approached him and said: "For the last time, I pray you to answer my questions, wise man."`,
+      bn: `জার তাঁর কাছে গিয়ে বললেন: “শেষবারের মতো, হে জ্ঞানী, আমার প্রশ্নগুলোর উত্তর দিন।”`
+    },
+    {
+      id: 'p028',
+      section: 'story',
+      en: `"You have already been answered!" said the hermit, still crouching⁶ on his thin legs, and looking up at the Tsar, who stood before him.`,
+      bn: `“আপনি ইতিমধ্যেই উত্তর পেয়েছেন!” সন্ন্যাসী বললেন, তাঁর পাতলা পায়ে গুটিসুটি মেরে বসে জারের দিকে তাকিয়ে, যিনি তাঁর সামনে দাঁড়িয়েছিলেন।`
+    },
+    {
+      id: 'p029',
+      section: 'story',
+      en: `"How answered? What do you mean?" asked the Tsar.`,
+      bn: `“কীভাবে উত্তর পেয়েছি? কী বলছেন?” জার জিজ্ঞেস করলেন।`
+    },
+    {
+      id: 'p030',
+      section: 'story',
+      en: `"Do you not see?" replied the hermit. "If you had not pitied my weakness yesterday, and had not dug these beds for me, but had gone your way, that man would have attacked you, and you would have repented of not having stayed with me. So the most important time was when you were digging the beds; and I was the most important man; and to do me good was your most important business. Afterwards, when that man ran to us, the most important time was when you were attending to him, for if you had not bound up his wounds he would have died without having made peace with you. So he was the most important man, and what you did for him was your most important business. Remember then: there is only one time that is important — now! It is the most important time because it is the only time when we have any power. The most necessary person is the one with whom you are, for no man knows whether he will ever have dealings with anyone else: and the most important affair is, to do him good, because for that purpose alone was man sent into this life!"`,
+      bn: `“বুঝতে পারছেন না?” সন্ন্যাসী উত্তর দিলেন। “যদি গতকাল আপনি আমার দুর্বলতার প্রতি করুণা না করতেন এবং আমার জন্য এই বিছানাগুলো না খুঁড়তেন, বরং নিজের পথে চলে যেতেন—তাহলে সেই লোকটি আপনাকে আক্রমণ করত, এবং আপনি অনুতপ্ত হতেন যে আমার সাথে থাকেননি। তাই সবচেয়ে গুরুত্বপূর্ণ সময় ছিল যখন আপনি বিছানা খুঁড়ছিলেন; আমিই ছিলাম সবচেয়ে গুরুত্বপূর্ণ মানুষ; এবং আমার উপকার করাই ছিল আপনার সবচেয়ে গুরুত্বপূর্ণ কাজ। পরে যখন সেই লোকটি আমাদের কাছে দৌড়ে এল, তখন সবচেয়ে গুরুত্বপূর্ণ সময় ছিল যখন আপনি তার সেবা করছিলেন—কারণ যদি আপনি তার ক্ষত না বাঁধতেন, সে আপনার সাথে শান্তি স্থাপন না করেই মারা যেত। তাই সেই ছিল সবচেয়ে গুরুত্বপূর্ণ মানুষ, এবং তার জন্য যা করেছিলেন তাই ছিল আপনার সবচেয়ে গুরুত্বপূর্ণ কাজ। মনে রাখবেন: শুধু একটি সময়ই গুরুত্বপূর্ণ—এখন! এটাই সবচেয়ে গুরুত্বপূর্ণ সময়, কারণ এটাই একমাত্র সময় যখন আমাদের কোনো ক্ষমতা আছে। সবচেয়ে প্রয়োজনীয় মানুষ হলো সেই, যার সাথে আপনি আছেন—কারণ কেউ জানে না সে আর কারো সাথে কখনো সম্পর্ক রাখবে কি না; এবং সবচেয়ে গুরুত্বপূর্ণ কাজ হলো তার উপকার করা, কারণ শুধু সেই উদ্দেশ্যেই মানুষকে এই জীবনে পাঠানো হয়েছে!”`
+    }
+  ];
+
+  // Footnotes
+  const FOOTNOTES = {
+    '1': { title: 'Tsar', body: 'Title of a Russian ruler.' },
+    '2': { title: 'dismounted', body: 'got down.' },
+    '3': { title: 'executed', body: 'took the life of.' },
+    '4': { title: 'resolved', body: 'decided.' },
+    '5': { title: 'Ambush', body: 'hide out.' },
+    '6': { title: 'Crouching', body: 'bending the knees and the upper body forward.' }
+  };
+
+  // Vocabulary dictionary (~60% meaningful coverage focus)
+  const VOCAB = {
+    occurred: { bn: 'ঘটেছিল / মনে এসেছিল', pron: 'অকার্ড', pos: 'Verb', ctx: 'The thought occurred to the Tsar.' },
+    certain: { bn: 'একজন / নির্দিষ্ট', pron: 'সার্টেন', pos: 'Adjective', ctx: 'a certain Tsar' },
+    Tsar: { bn: 'জার (রাশিয়ার সম্রাট)', pron: 'জার', pos: 'Noun', ctx: 'Title of a Russian ruler' },
+    undertake: { bn: 'হারানো / শুরু করা', pron: 'আন্ডারটেক', pos: 'Verb', ctx: 'anything he might undertake' },
+    proclaimed: { bn: 'ঘোষণা করা হয়েছিল', pron: 'প্রোক্লেইমড', pos: 'Verb', ctx: 'he had it proclaimed' },
+    reward: { bn: 'পুরস্কার', pron: 'রিওয়ার্ড', pos: 'Noun', ctx: 'a great reward' },
+    necessary: { bn: 'প্রয়োজনীয়', pron: 'নেসেসারি', pos: 'Adjective', ctx: 'the most necessary people' },
+    learned: { bn: 'বিদ্বান / শিক্ষিত', pron: 'লার্নড', pos: 'Adjective', ctx: 'learned men' },
+    differently: { bn: 'ভিন্নভাবে', pron: 'ডিফারেন্টলি', pos: 'Adverb', ctx: 'answered differently' },
+    reply: { bn: 'উত্তর', pron: 'রিপ্লাই', pos: 'Noun', ctx: 'In reply to the first question' },
+    advance: { bn: 'আগেভাগে', pron: 'অ্যাডভান্স', pos: 'Noun', ctx: 'in advance' },
+    strictly: { bn: 'কঠোরভাবে', pron: 'স্ট্রিক্টলি', pos: 'Adverb', ctx: 'live strictly according to it' },
+    proper: { bn: 'সঠিক / যথাযথ', pron: 'প্রপার', pos: 'Adjective', ctx: 'at its proper time' },
+    declared: { bn: 'ঘোষণা করেছিলেন', pron: 'ডিক্লেয়ার্ড', pos: 'Verb', ctx: 'Others declared' },
+    impossible: { bn: 'অসম্ভব', pron: 'ইমপসিবল', pos: 'Adjective', ctx: 'it was impossible' },
+    beforehand: { bn: 'আগে থেকে', pron: 'বিফোরহ্যান্ড', pos: 'Adverb', ctx: 'decide beforehand' },
+    absorbed: { bn: 'মগ্ন', pron: 'অ্যাবজর্বড', pos: 'Adjective', ctx: 'absorbed in idle pastimes' },
+    idle: { bn: 'অলস', pron: 'আইডল', pos: 'Adjective', ctx: 'idle pastimes' },
+    pastimes: { bn: 'বিনোদন / খেলাধুলা', pron: 'পাসটাইমস', pos: 'Noun', ctx: 'idle pastimes' },
+    attend: { bn: 'মনোযোগ দেওয়া', pron: 'অ্যাটেন্ড', pos: 'Verb', ctx: 'attend to all that was going on' },
+    needful: { bn: 'প্রয়োজনীয়', pron: 'নিডফুল', pos: 'Adjective', ctx: 'what was most needful' },
+    attentive: { bn: 'মনোযোগী', pron: 'অ্যাটেন্টিভ', pos: 'Adjective', ctx: 'however attentive' },
+    council: { bn: 'পরিষদ / কাউন্সিল', pron: 'কাউন্সিল', pos: 'Noun', ctx: 'a council of wise men' },
+    fix: { bn: 'নির্ধারণ করা', pron: 'ফিক্স', pos: 'Verb', ctx: 'fix the proper time' },
+    consult: { bn: 'পরামর্শ করা', pron: 'কনসাল্ট', pos: 'Verb', ctx: 'consult magicians' },
+    magicians: { bn: 'জাদুকর', pron: 'ম্যাজিশিয়ান্স', pos: 'Noun', ctx: 'only magicians who know' },
+    equally: { bn: 'সমানভাবে', pron: 'ইকুয়ালি', pos: 'Adverb', ctx: 'Equally various' },
+    various: { bn: 'বিভিন্ন', pron: 'ভেয়ারিয়াস', pos: 'Adjective', ctx: 'various were the answers' },
+    councillors: { bn: 'উপদেষ্টা', pron: 'কাউন্সিলরস', pos: 'Noun', ctx: 'his councillors' },
+    priests: { bn: 'পুরোহিত', pron: 'প্রিস্টস', pos: 'Noun', ctx: 'the priests' },
+    warriors: { bn: 'যোদ্ধা', pron: 'ওয়ারিয়রস', pos: 'Noun', ctx: 'the warriors' },
+    occupation: { bn: 'পেশা / কাজ', pron: 'অকুপেশন', pos: 'Noun', ctx: 'the most important occupation' },
+    science: { bn: 'বিজ্ঞান', pron: 'সায়েন্স', pos: 'Noun', ctx: 'science' },
+    warfare: { bn: 'যুদ্ধবিদ্যা', pron: 'ওয়ারফেয়ার', pos: 'Noun', ctx: 'skill in warfare' },
+    religious: { bn: 'ধর্মীয়', pron: 'রিলিজিয়াস', pos: 'Adjective', ctx: 'religious worship' },
+    worship: { bn: 'উপাসনা', pron: 'ওয়ারশিপ', pos: 'Noun', ctx: 'religious worship' },
+    agreed: { bn: 'একমত হয়েছিলেন', pron: 'অ্যাগ্রীড', pos: 'Verb', ctx: 'agreed with none' },
+    wishing: { bn: 'ইচ্ছা করে', pron: 'ইউইশিং', pos: 'Verb', ctx: 'still wishing to find' },
+    hermit: { bn: 'সন্ন্যাসী / একাকী বাসকারী', pron: 'হারমিট', pos: 'Noun', ctx: 'consult a hermit' },
+    renowned: { bn: 'সুপরিচিত / বিখ্যাত', pron: 'রিনাউন্ড', pos: 'Adjective', ctx: 'widely renowned' },
+    wisdom: { bn: 'জ্ঞান / প্রজ্ঞা', pron: 'উইজডম', pos: 'Noun', ctx: 'renowned for his wisdom' },
+    quitted: { bn: 'ত্যাগ করেছিলেন', pron: 'কুইটেড', pos: 'Verb', ctx: 'which he never quitted' },
+    received: { bn: 'গ্রহণ করতেন', pron: 'রিসিভড', pos: 'Verb', ctx: 'he received none but common folk' },
+    common: { bn: 'সাধারণ', pron: 'কমন', pos: 'Adjective', ctx: 'common folk' },
+    folk: { bn: 'লোকজন', pron: 'ফোক', pos: 'Noun', ctx: 'common folk' },
+    dismounted: { bn: 'নেমেছিলেন', pron: 'ডিসমাউন্টেড', pos: 'Verb', ctx: 'dismounted from his horse' },
+    bodyguard: { bn: 'রক্ষী', pron: 'বডিগার্ড', pos: 'Noun', ctx: 'leaving his bodyguard' },
+    approached: { bn: 'কাছে এসেছিলেন', pron: 'অ্যাপ্রোচড', pos: 'Verb', ctx: 'When the Tsar approached' },
+    digging: { bn: 'খুঁড়ছিলেন', pron: 'ডিগিং', pos: 'Verb', ctx: 'was digging the ground' },
+    greeted: { bn: 'অভিবাদন জানিয়েছিলেন', pron: 'গ্রিটেড', pos: 'Verb', ctx: 'he greeted him' },
+    frail: { bn: 'দুর্বল / ক্ষীণ', pron: 'ফ্রেইল', pos: 'Adjective', ctx: 'The hermit was frail' },
+    weak: { bn: 'দুর্বল', pron: 'উইক', pos: 'Adjective', ctx: 'frail and weak' },
+    spade: { bn: 'কোদাল', pron: 'স্পেড', pos: 'Noun', ctx: 'stuck his spade' },
+    breathed: { bn: 'শ্বাস ফেলতেন', pron: 'ব্রিদড', pos: 'Verb', ctx: 'he breathed heavily' },
+    heavily: { bn: 'ভারীভাবে', pron: 'হেভিলি', pos: 'Adverb', ctx: 'breathed heavily' },
+    spat: { bn: 'থুথু দিয়েছিলেন', pron: 'স্প্যাট', pos: 'Verb', ctx: 'He just spat on his hand' },
+    recommenced: { bn: 'আবার শুরু করেছিলেন', pron: 'রিকমেন্সড', pos: 'Verb', ctx: 'recommenced digging' },
+    tired: { bn: 'ক্লান্ত', pron: 'টায়ার্ড', pos: 'Adjective', ctx: 'You are tired' },
+    awhile: { bn: 'কিছুক্ষণ', pron: 'অ্যাওয়াইল', pos: 'Adverb', ctx: 'work awhile for you' },
+    thanks: { bn: 'ধন্যবাদ', pron: 'থ্যাংকস', pos: 'Interjection', ctx: '"Thanks!" said the hermit' },
+    beds: { bn: 'বাগানের বিছানা / ক্যারি', pron: 'বেডস', pos: 'Noun', ctx: 'dug two beds' },
+    repeated: { bn: 'আবার বলেছিলেন', pron: 'রিপিটেড', pos: 'Verb', ctx: 'repeated his questions' },
+    stretched: { bn: 'বাড়িয়েছিলেন', pron: 'স্ট্রেচড', pos: 'Verb', ctx: 'stretched out his hand' },
+    continued: { bn: 'চালিয়ে গিয়েছিলেন', pron: 'কন্টিনিউড', pos: 'Verb', ctx: 'continued to dig' },
+    sink: { bn: 'ডোবা', pron: 'সিঙ্ক', pos: 'Verb', ctx: 'The sun began to sink' },
+    stuck: { bn: 'পুঁতে দিয়েছিলেন', pron: 'স্টাক', pos: 'Verb', ctx: 'stuck the spade into the ground' },
+    return: { bn: 'ফিরে যাওয়া', pron: 'রিটার্ন', pos: 'Verb', ctx: 'I will return home' },
+    bearded: { bn: 'দাড়িওয়ালা', pron: 'বিয়ার্ডেড', pos: 'Adjective', ctx: 'a bearded man' },
+    pressed: { bn: 'চাপ দিয়ে ধরে', pron: 'প্রেসড', pos: 'Verb', ctx: 'hands pressed against his stomach' },
+    flowing: { bn: 'বেরোচ্ছে', pron: 'ফ্লোয়িং', pos: 'Verb', ctx: 'blood was flowing' },
+    fainting: { bn: 'অজ্ঞান হয়ে', pron: 'ফেইন্টিং', pos: 'Verb', ctx: 'fell fainting' },
+    moaning: { bn: 'আর্তনাদ করে', pron: 'মোনিং', pos: 'Verb', ctx: 'moaning feebly' },
+    feebly: { bn: 'দুর্বলভাবে', pron: 'ফিবলি', pos: 'Adverb', ctx: 'moaning feebly' },
+    unfastened: { bn: 'খুলেছিলেন', pron: 'আনফাস্টেনড', pos: 'Verb', ctx: 'unfastened the man\'s clothing' },
+    wound: { bn: 'ক্ষত', pron: 'উউন্ড', pos: 'Noun', ctx: 'a large wound' },
+    bandaged: { bn: 'ব্যান্ডেজ করেছিলেন', pron: 'ব্যান্ডেজড', pos: 'Verb', ctx: 'bandaged it' },
+    handkerchief: { bn: 'রুমাল', pron: 'হ্যান্ডকারচিফ', pos: 'Noun', ctx: 'with his handkerchief' },
+    soaked: { bn: 'ভেজা', pron: 'সোকড', pos: 'Adjective', ctx: 'bandage soaked with warm blood' },
+    ceased: { bn: 'থেমে গিয়েছিল', pron: 'সিসড', pos: 'Verb', ctx: 'the blood ceased flowing' },
+    revived: { bn: 'জ্ঞান ফিরে পেয়েছিল', pron: 'রিভাইভড', pos: 'Verb', ctx: 'the man revived' },
+    meanwhile: { bn: 'ইতিমধ্যে', pron: 'মিনওয়াইল', pos: 'Adverb', ctx: 'Meanwhile the sun had set' },
+    carried: { bn: 'বহন করে নিয়ে গিয়েছিলেন', pron: 'ক্যারিড', pos: 'Verb', ctx: 'carried the wounded man' },
+    crouched: { bn: 'গুটিসুটি মেরে বসেছিলেন', pron: 'ক্রাউচড', pos: 'Verb', ctx: 'he crouched down' },
+    threshold: { bn: 'দোরগোড়া', pron: 'থ্রেশহোল্ড', pos: 'Noun', ctx: 'on the threshold' },
+    soundly: { bn: 'গভীরভাবে', pron: 'সাউন্ডলি', pos: 'Adverb', ctx: 'slept so soundly' },
+    awoke: { bn: 'জেগে উঠেছিলেন', pron: 'অ্যাওক', pos: 'Verb', ctx: 'When he awoke' },
+    gazing: { bn: 'তাকিয়ে আছে', pron: 'গেজিং', pos: 'Verb', ctx: 'gazing intently' },
+    intently: { bn: 'মনোযোগ সহকারে', pron: 'ইনটেন্টলি', pos: 'Adverb', ctx: 'gazing intently' },
+    shining: { bn: 'উজ্জ্বল', pron: 'শাইনিং', pos: 'Adjective', ctx: 'with shining eyes' },
+    forgive: { bn: 'ক্ষমা করা', pron: 'ফরগিভ', pos: 'Verb', ctx: '"Forgive me!"' },
+    enemy: { bn: 'শত্রু', pron: 'এনিমি', pos: 'Noun', ctx: 'that enemy of yours' },
+    swore: { bn: 'শপথ করেছিল', pron: 'স্বোর', pos: 'Verb', ctx: 'who swore to revenge' },
+    revenge: { bn: 'প্রতিশোধ', pron: 'রিভেঞ্জ', pos: 'Noun', ctx: 'revenge himself on you' },
+    executed: { bn: 'মৃত্যুদণ্ড দিয়েছিলেন', pron: 'এক্সিকিউটেড', pos: 'Verb', ctx: 'you executed his brother' },
+    seized: { bn: 'কেড়ে নিয়েছিলেন', pron: 'সিজড', pos: 'Verb', ctx: 'seized his property' },
+    resolved: { bn: 'সিদ্ধান্ত নিয়েছিলেন', pron: 'রিজলভড', pos: 'Verb', ctx: 'I resolved to kill you' },
+    ambush: { bn: 'ওঁত পাতা জায়গা', pron: 'অ্যামবুশ', pos: 'Noun', ctx: 'from my ambush' },
+    recognized: { bn: 'চিনে ফেলেছিল', pron: 'রেকগনাইজড', pos: 'Verb', ctx: 'they recognized me' },
+    escaped: { bn: 'পালিয়ে গিয়েছিল', pron: 'এস্কেপড', pos: 'Verb', ctx: 'I escaped from them' },
+    dressed: { bn: 'ব্যান্ডেজ করেছিলেন', pron: 'ড্রেসড', pos: 'Verb', ctx: 'dressed my wound' },
+    faithful: { bn: 'বিশ্বস্ত', pron: 'ফেইথফুল', pos: 'Adjective', ctx: 'most faithful slave' },
+    slave: { bn: 'দাস', pron: 'স্লেভ', pos: 'Noun', ctx: 'faithful slave' },
+    bid: { bn: 'বলা / আদেশ করা', pron: 'বিড', pos: 'Verb', ctx: 'will bid my sons' },
+    peace: { bn: 'শান্তি', pron: 'পিস', pos: 'Noun', ctx: 'made peace with his enemy' },
+    gained: { bn: 'পেয়েছিলেন', pron: 'গেইনড', pos: 'Verb', ctx: 'gained him for a friend' },
+    physician: { bn: 'চিকিৎসক', pron: 'ফিজিশিয়ান', pos: 'Noun', ctx: 'his own physician' },
+    restore: { bn: 'ফিরিয়ে দেওয়া', pron: 'রিস্টোর', pos: 'Verb', ctx: 'restore his property' },
+    leave: { bn: 'বিদায়', pron: 'লিভ', pos: 'Noun', ctx: 'taken leave of' },
+    porch: { bn: 'বারান্দা', pron: 'পোর্চ', pos: 'Noun', ctx: 'out into the porch' },
+    sowing: { bn: 'বুনছিলেন', pron: 'সোয়িং', pos: 'Verb', ctx: 'sowing seeds' },
+    seeds: { bn: 'বীজ', pron: 'সিডস', pos: 'Noun', ctx: 'sowing seeds' },
+    pray: { bn: 'অনুরোধ করা', pron: 'প্রে', pos: 'Verb', ctx: 'I pray you to answer' },
+    crouching: { bn: 'গুটিসুটি মেরে বসে', pron: 'ক্রাউচিং', pos: 'Verb', ctx: 'still crouching on his thin legs' },
+    pitied: { bn: 'করুণা করেছিলেন', pron: 'পিটিড', pos: 'Verb', ctx: 'had not pitied my weakness' },
+    weakness: { bn: 'দুর্বলতা', pron: 'উইকনেস', pos: 'Noun', ctx: 'my weakness' },
+    repented: { bn: 'অনুতপ্ত হতেন', pron: 'রিপেন্টেড', pos: 'Verb', ctx: 'you would have repented' },
+    attending: { bn: 'সেবা করছিলেন', pron: 'অ্যাটেন্ডিং', pos: 'Verb', ctx: 'attending to him' },
+    bound: { bn: 'বেঁধেছিলেন', pron: 'বাউন্ড', pos: 'Verb', ctx: 'bound up his wounds' },
+    power: { bn: 'ক্ষমতা', pron: 'পাওয়ার', pos: 'Noun', ctx: 'when we have any power' },
+    dealings: { bn: 'সম্পর্ক / লেনদেন', pron: 'ডিলিংস', pos: 'Noun', ctx: 'have dealings with anyone else' },
+    affair: { bn: 'কাজ / বিষয়', pron: 'অ্যাফেয়ার', pos: 'Noun', ctx: 'the most important affair' },
+    purpose: { bn: 'উদ্দেশ্য', pron: 'পারপাস', pos: 'Noun', ctx: 'for that purpose alone' }
+  };
+
+  // Quiz questions (story-based, unique)
+  const QUIZ = [
+    { q: 'Who is the author of "Three Questions"?', opts: ['Leo Tolstoy', 'Anton Chekhov', 'Fyodor Dostoevsky', 'Alexander Pushkin'], ans: 0, exp: 'Leo Tolstoy wrote this short story, first published in 1885.' },
+    { q: 'What title does the ruler hold in the story?', opts: ['King', 'Tsar', 'Emperor', 'Sultan'], ans: 1, exp: 'The story uses "Tsar", the title of a Russian ruler.' },
+    { q: 'What was the first of the Tsar’s three questions?', opts: ['Who should I marry?', 'What is the right time for every action?', 'How can I become rich?', 'Where should I build my palace?'], ans: 1, exp: 'He wanted to know the right time to begin everything.' },
+    { q: 'What was the second question?', opts: ['Who are the most necessary people?', 'What is the best food?', 'How long will I live?', 'Where is the treasure?'], ans: 0, exp: 'Who were the right people to listen to / the most necessary people.' },
+    { q: 'What was the third question?', opts: ['What is the most important thing to do?', 'How to win wars?', 'When will the world end?', 'Who invented writing?'], ans: 0, exp: 'What was the most important thing to do / most important occupation.' },
+    { q: 'Why did the Tsar proclaim a reward?', opts: ['To find answers to his three questions', 'To celebrate his birthday', 'To build a new temple', 'To hire more soldiers'], ans: 0, exp: 'He wanted anyone who could teach him the answers to receive a great reward.' },
+    { q: 'How did the learned men answer the Tsar?', opts: ['All the same way', 'They all answered differently', 'They refused to answer', 'They laughed'], ans: 1, exp: 'They all answered his questions differently.' },
+    { q: 'Some learned men said one must consult ______ to know the right time.', opts: ['doctors', 'magicians', 'farmers', 'children'], ans: 1, exp: 'Only magicians know what is going to happen.' },
+    { q: 'Where did the hermit live?', opts: ['In a palace', 'In a wood / forest', 'In a city', 'On a mountain top only'], ans: 1, exp: 'The hermit lived in a wood which he never quitted.' },
+    { q: 'Whom did the hermit receive?', opts: ['Only kings', 'None but common folk', 'Only soldiers', 'Everyone'], ans: 1, exp: 'He received none but common folk.' },
+    { q: 'What did the Tsar do before meeting the hermit?', opts: ['Brought gifts', 'Put on simple clothes and left his bodyguard', 'Sent a letter', 'Came with an army'], ans: 1, exp: 'He put on simple clothes, dismounted, and went alone.' },
+    { q: 'What was the hermit doing when the Tsar arrived?', opts: ['Praying', 'Digging the ground', 'Sleeping', 'Reading'], ans: 1, exp: 'He was digging the ground in front of his hut.' },
+    { q: 'How is the hermit described physically?', opts: ['Strong and tall', 'Frail and weak', 'Young and energetic', 'Fat and lazy'], ans: 1, exp: 'The hermit was frail and weak.' },
+    { q: 'What did the Tsar do to help the hermit?', opts: ['Gave him money', 'Took the spade and dug for him', 'Built a new hut', 'Brought food'], ans: 1, exp: 'He took the spade and worked awhile for him.' },
+    { q: 'Who came running out of the wood?', opts: ['A messenger', 'A bearded wounded man', 'The Tsar’s son', 'A soldier'], ans: 1, exp: 'A bearded man with a wound in his stomach.' },
+    { q: 'What did the Tsar do for the wounded man?', opts: ['Ignored him', 'Washed and bandaged the wound', 'Arrested him', 'Sent him away'], ans: 1, exp: 'He washed and re-bandaged the wound until the blood stopped.' },
+    { q: 'Why had the bearded man wanted to kill the Tsar?', opts: ['For money', 'Because the Tsar executed his brother and seized his property', 'He was mad', 'The hermit asked him'], ans: 1, exp: 'Revenge for his brother’s execution and loss of property.' },
+    { q: 'What does "resolved" mean in the story?', opts: ['Forgotten', 'Decided', 'Sung', 'Painted'], ans: 1, exp: 'Footnote: resolved = decided.' },
+    { q: 'What does "ambush" mean?', opts: ['A party', 'Hide out / place of waiting to attack', 'A bridge', 'A song'], ans: 1, exp: 'Footnote: Ambush = hide out.' },
+    { q: 'According to the hermit, what is the most important time?', opts: ['Tomorrow', 'Yesterday', 'Now', 'Never'], ans: 2, exp: 'There is only one time that is important — now!' },
+    { q: 'Who is the most necessary person, according to the hermit?', opts: ['The king', 'The one with whom you are', 'A magician', 'A doctor'], ans: 1, exp: 'The most necessary person is the one with whom you are.' },
+    { q: 'What is the most important affair?', opts: ['To become rich', 'To do good to the person you are with', 'To study science', 'To wage war'], ans: 1, exp: 'To do him good, because for that purpose alone was man sent into this life.' },
+    { q: 'What would have happened if the Tsar had not stayed to dig?', opts: ['Nothing', 'The enemy would have attacked him on the way', 'He would have found treasure', 'The hermit would have died'], ans: 1, exp: 'That man would have attacked him.' },
+    { q: 'What is the central moral of the story?', opts: ['Plan everything in advance', 'Live in the present and do good to those around you', 'Always consult magicians', 'Power is everything'], ans: 1, exp: 'The present moment, the person before you, and doing good are what matter.' },
+    { q: 'In which year was the story first published?', opts: ['1869', '1885', '1903', '1910'], ans: 1, exp: 'First published in 1885 as part of What Men Live By, and Other Tales.' }
+  ];
+
+  // ---------- STATE ----------
+  let currentSection = 'landing';
+  let currentParaIndex = 0;
+  let isPlaying = false;
+  let speechUtterance = null;
+  let speechRate = 0.85;
+  let bnVisible = false;
+  let settings = loadSettings();
+  let progress = loadProgress();
+  let currentWordEl = null;
+
+  // ---------- INIT ----------
+  function initApp() {
+    applySettings();
+    renderStory('storyContainer');
+    renderStory('listenContainer');
+    renderLearnMode();
+    renderVocabList();
+    updateDashboard();
+    initNavigation();
+    initAudio();
+    initSpeech();
+    initQuiz();
+    initSettings();
+    initSearch();
+    initBookmarks();
+    initParticles();
+    registerSW();
+    // restore last section if needed
+    showSection(currentSection);
+  }
+
+  // ---------- NAVIGATION ----------
+  function initNavigation() {
+    document.querySelectorAll('[data-section]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.preventDefault();
+        const sec = el.getAttribute('data-section');
+        showSection(sec);
+        closeDrawer();
+      });
+    });
+    document.getElementById('hamburger').addEventListener('click', openDrawer);
+    document.getElementById('drawerClose').addEventListener('click', closeDrawer);
+    document.getElementById('drawer').addEventListener('click', (e) => {
+      if (e.target.id === 'drawer') closeDrawer();
+    });
+  }
+
+  function showSection(id) {
+    currentSection = id;
+    document.querySelectorAll('.app-section, .landing').forEach(s => s.classList.remove('active'));
+    if (id === 'landing') {
+      document.getElementById('section-landing').style.display = 'flex';
+    } else {
+      document.getElementById('section-landing').style.display = 'none';
+      const el = document.getElementById('section-' + id);
+      if (el) el.classList.add('active');
+    }
+    // update nav active
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.classList.toggle('active', a.getAttribute('data-section') === id);
+    });
+    if (id === 'listen' || id === 'read') updateProgressBar();
+    window.scrollTo(0, 0);
+  }
+
+  function openDrawer() { document.getElementById('drawer').classList.add('open'); }
+  function closeDrawer() { document.getElementById('drawer').classList.remove('open'); }
+
+  // ---------- STORY RENDER ----------
+  function renderStory(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = '';
+    PARAGRAPHS.forEach((p, idx) => {
+      const div = document.createElement('div');
+      div.className = 'paragraph';
+      div.id = p.id;
+      div.dataset.index = idx;
+
+      const header = document.createElement('div');
+      header.className = 'para-header';
+      header.innerHTML = `
+        <span class="para-num">¶ ${idx + 1}</span>
+        <div class="para-actions">
+          <button class="para-btn bn-btn" data-idx="${idx}" title="Bengali meaning">বাংলা অর্থ</button>
+          <button class="para-btn bookmark-btn" data-idx="${idx}" title="Bookmark">🔖</button>
+        </div>`;
+      div.appendChild(header);
+
+      const textDiv = document.createElement('div');
+      textDiv.className = 'para-text';
+      textDiv.innerHTML = processText(p.en, idx);
+      div.appendChild(textDiv);
+
+      const bnDiv = document.createElement('div');
+      bnDiv.className = 'para-bn';
+      bnDiv.id = 'bn-' + p.id;
+      bnDiv.textContent = p.bn;
+      div.appendChild(bnDiv);
+
+      container.appendChild(div);
+    });
+
+    // events
+    container.querySelectorAll('.bn-btn').forEach(btn => {
+      btn.addEventListener('click', () => toggleParaBn(btn.dataset.idx));
+    });
+    container.querySelectorAll('.bookmark-btn').forEach(btn => {
+      btn.addEventListener('click', () => toggleBookmark(btn.dataset.idx));
+    });
+    container.querySelectorAll('.word').forEach(w => {
+      w.addEventListener('click', (e) => showVocabPopup(e, w));
+    });
+    container.querySelectorAll('.footnote-ref').forEach(f => {
+      f.addEventListener('click', () => showFootnote(f.dataset.fn));
+    });
+  }
+
+  function processText(text, paraIdx) {
+    // Replace footnote markers ¹–⁶
+    text = text.replace(/([¹²³⁴⁵⁶])/g, (m) => {
+      const map = { '¹': '1', '²': '2', '³': '3', '⁴': '4', '⁵': '5', '⁶': '6' };
+      return `<sup class="footnote-ref" data-fn="${map[m]}" tabindex="0">${m}</sup>`;
+    });
+    // Wrap words
+    return text.replace(/([A-Za-zÀ-ÿ]+(?:'[A-Za-z]+)?)/g, (word) => {
+      const key = word.toLowerCase().replace(/[^a-z]/g, '');
+      const hasVocab = VOCAB[key] || VOCAB[word];
+      const cls = hasVocab ? 'word' : 'word';
+      return `<span class="${cls}" data-word="${word}" data-key="${key}" tabindex="0">${word}</span>`;
+    });
+  }
+
+  function toggleParaBn(idx) {
+    const p = PARAGRAPHS[idx];
+    const el = document.getElementById('bn-' + p.id);
+    if (el) el.classList.toggle('show');
+  }
+
+  // ---------- LEARN MODE ----------
+  function renderLearnMode() {
+    const container = document.getElementById('learnContainer');
+    if (!container) return;
+    container.innerHTML = '';
+    PARAGRAPHS.forEach((p, idx) => {
+      const div = document.createElement('div');
+      div.className = 'paragraph';
+      div.innerHTML = `
+        <div class="para-header"><span class="para-num">¶ ${idx + 1}</span></div>
+        <div class="para-text">${processText(p.en, idx)}</div>
+        <div class="para-bn show">${p.bn}</div>
+      `;
+      container.appendChild(div);
+    });
+    container.querySelectorAll('.word').forEach(w => {
+      w.addEventListener('click', (e) => showVocabPopup(e, w));
+    });
+    container.querySelectorAll('.footnote-ref').forEach(f => {
+      f.addEventListener('click', () => showFootnote(f.dataset.fn));
+    });
+  }
+
+  // ---------- VOCAB POPUP ----------
+  function showVocabPopup(e, el) {
+    e.stopPropagation();
+    const word = el.dataset.word;
+    const key = el.dataset.key;
+    const data = VOCAB[key] || VOCAB[word] || {
+      bn: 'সাধারণ অর্থ দেখুন অভিধানে',
+      pron: '',
+      pos: '',
+      ctx: ''
+    };
+    const popup = document.getElementById('vocabPopup');
+    document.getElementById('vpWord').textContent = word;
+    document.getElementById('vpBn').textContent = data.bn;
+    document.getElementById('vpPron').textContent = data.pron ? 'Pronunciation: ' + data.pron : '';
+    document.getElementById('vpPos').textContent = data.pos ? 'Part of speech: ' + data.pos : '';
+    document.getElementById('vpCtx').textContent = data.ctx ? 'Context: “' + data.ctx + '”' : '';
+
+    // position
+    const rect = el.getBoundingClientRect();
+    let top = rect.bottom + 8;
+    let left = Math.min(rect.left, window.innerWidth - 320);
+    if (top + 200 > window.innerHeight) top = rect.top - 180;
+    popup.style.top = Math.max(8, top) + 'px';
+    popup.style.left = Math.max(8, left) + 'px';
+    popup.classList.add('show');
+
+    currentWordEl = el;
+    document.getElementById('vpSpeak').onclick = () => speakWord(word);
+    document.getElementById('vpSave').onclick = () => saveWord(key || word.toLowerCase());
+
+    // mark as seen
+    if (!progress.seenWords.includes(key)) {
+      progress.seenWords.push(key);
+      saveProgress();
+    }
+  }
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.vocab-popup') && !e.target.closest('.word')) {
+      document.getElementById('vocabPopup').classList.remove('show');
+    }
+  });
+
+  function speakWord(word) {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(word);
+    u.rate = 0.9;
+    u.lang = 'en-GB';
+    window.speechSynthesis.speak(u);
+  }
+
+  function saveWord(key) {
+    if (!progress.savedWords.includes(key)) {
+      progress.savedWords.push(key);
+      saveProgress();
+      updateDashboard();
+      alert('Word saved to favourites!');
+    }
+  }
+
+  // ---------- FOOTNOTES ----------
+  function showFootnote(num) {
+    const fn = FOOTNOTES[num];
+    if (!fn) return;
+    document.getElementById('fnTitle').textContent = fn.title;
+    document.getElementById('fnBody').textContent = fn.body;
+    document.getElementById('fnModal').classList.add('show');
+  }
+  document.getElementById('fnClose').addEventListener('click', () => {
+    document.getElementById('fnModal').classList.remove('show');
+  });
+  document.getElementById('fnModal').addEventListener('click', (e) => {
+    if (e.target.id === 'fnModal') document.getElementById('fnModal').classList.remove('show');
+  });
+
+  // ---------- AUDIO / SPEECH ----------
+  function initAudio() {
+    document.getElementById('btnPlay').addEventListener('click', playCurrent);
+    document.getElementById('btnPause').addEventListener('click', pauseSpeech);
+    document.getElementById('btnStop').addEventListener('click', stopSpeech);
+    document.getElementById('btnPrev').addEventListener('click', () => {
+      if (currentParaIndex > 0) {
+        currentParaIndex--;
+        if (isPlaying) playCurrent();
+        else highlightPara(currentParaIndex);
+      }
+    });
+    document.getElementById('btnNext').addEventListener('click', () => {
+      if (currentParaIndex < PARAGRAPHS.length - 1) {
+        currentParaIndex++;
+        if (isPlaying) playCurrent();
+        else highlightPara(currentParaIndex);
+      }
+    });
+    document.getElementById('speedSel').addEventListener('change', (e) => {
+      speechRate = parseFloat(e.target.value);
+    });
+    document.getElementById('bnGlobalToggle').addEventListener('click', () => {
+      bnVisible = !bnVisible;
+      document.querySelectorAll('.para-bn').forEach(el => {
+        el.classList.toggle('show', bnVisible);
+      });
+      document.getElementById('bnGlobalToggle').classList.toggle('active', bnVisible);
+    });
+  }
+
+  function initSpeech() {
+    // Web Speech API ready
+  }
+
+  function playCurrent() {
+    stopSpeech();
+    const p = PARAGRAPHS[currentParaIndex];
+    if (!p) return;
+    highlightPara(currentParaIndex);
+    if (settings.autoScroll) {
+      const el = document.getElementById(p.id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // Mark paragraph as read
+    if (!progress.readParas.includes(p.id)) {
+      progress.readParas.push(p.id);
+      saveProgress();
+      updateDashboard();
+    }
+
+    // Prefer human audio if available (structure ready)
+    // const audioSrc = audioLessons[p.id];
+    // if (audioSrc) { ... play audio + timings }
+    // Fallback: browser TTS
+    if (!window.speechSynthesis) {
+      alert('Speech synthesis not supported in this browser.');
+      return;
+    }
+    speechUtterance = new SpeechSynthesisUtterance(p.en.replace(/[¹²³⁴⁵⁶]/g, ''));
+    speechUtterance.rate = speechRate;
+    speechUtterance.lang = 'en-GB';
+    speechUtterance.onend = () => {
+      if (currentParaIndex < PARAGRAPHS.length - 1) {
+        currentParaIndex++;
+        playCurrent();
+      } else {
+        isPlaying = false;
+        updatePlayUI();
+      }
+    };
+    speechUtterance.onerror = () => {
+      isPlaying = false;
+      updatePlayUI();
+    };
+    window.speechSynthesis.speak(speechUtterance);
+    isPlaying = true;
+    updatePlayUI();
+  }
+
+  function pauseSpeech() {
+    if (window.speechSynthesis) window.speechSynthesis.pause();
+    isPlaying = false;
+    updatePlayUI();
+  }
+
+  function stopSpeech() {
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    isPlaying = false;
+    updatePlayUI();
+    document.querySelectorAll('.paragraph').forEach(p => p.classList.remove('active-para', 'reading-highlight'));
+  }
+
+  function updatePlayUI() {
+    document.getElementById('btnPlay').classList.toggle('hidden', isPlaying);
+    document.getElementById('btnPause').classList.toggle('hidden', !isPlaying);
+  }
+
+  function highlightPara(idx) {
+    document.querySelectorAll('.paragraph').forEach(p => p.classList.remove('active-para', 'reading-highlight'));
+    const p = PARAGRAPHS[idx];
+    if (!p) return;
+    // highlight in all containers
+    document.querySelectorAll('#' + p.id).forEach(el => {
+      el.classList.add('active-para', 'reading-highlight');
+    });
+    updateProgressBar();
+  }
+
+  function updateProgressBar() {
+    const pct = ((currentParaIndex + 1) / PARAGRAPHS.length) * 100;
+    document.getElementById('progressBar').style.width = pct + '%';
+  }
+
+  // ---------- VOCABULARY PANEL ----------
+  function renderVocabList(filter = 'all', search = '') {
+    const list = document.getElementById('vocabList');
+    if (!list) return;
+    list.innerHTML = '';
+    const keys = Object.keys(VOCAB).sort();
+    keys.forEach(key => {
+      const v = VOCAB[key];
+      if (search) {
+        const s = search.toLowerCase();
+        if (!key.includes(s) && !v.bn.includes(s) && !(v.pron || '').includes(s)) return;
+      }
+      if (filter === 'saved' && !progress.savedWords.includes(key)) return;
+      if (filter === 'learned' && !progress.learnedWords.includes(key)) return;
+      if (filter === 'difficult' && !['occurred','undertake','proclaimed','absorbed','pastimes','needful','attentive','recommenced','feebly','unfastened','revived','crouched','threshold','intently','resolved','ambush','repented','dealings'].includes(key)) return;
+
+      const item = document.createElement('div');
+      item.className = 'vocab-item';
+      item.innerHTML = `
+        <div>
+          <div class="v-word">${key}</div>
+          <div class="v-bn">${v.bn}</div>
+          <div class="v-meta">${v.pron ? v.pron + ' · ' : ''}${v.pos || ''}</div>
+        </div>
+        <div class="v-actions">
+          <button class="v-act" data-key="${key}" data-act="speak">🔊</button>
+          <button class="v-act ${progress.savedWords.includes(key) ? 'saved' : ''}" data-key="${key}" data-act="save">📌</button>
+          <button class="v-act ${progress.learnedWords.includes(key) ? 'saved' : ''}" data-key="${key}" data-act="learn">✓</button>
+        </div>`;
+      list.appendChild(item);
+    });
+    list.querySelectorAll('.v-act').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.key;
+        const act = btn.dataset.act;
+        if (act === 'speak') speakWord(key);
+        if (act === 'save') {
+          if (!progress.savedWords.includes(key)) progress.savedWords.push(key);
+          else progress.savedWords = progress.savedWords.filter(k => k !== key);
+          saveProgress();
+          renderVocabList(filter, search);
+          updateDashboard();
+        }
+        if (act === 'learn') {
+          if (!progress.learnedWords.includes(key)) progress.learnedWords.push(key);
+          else progress.learnedWords = progress.learnedWords.filter(k => k !== key);
+          saveProgress();
+          renderVocabList(filter, search);
+          updateDashboard();
+        }
+      });
+    });
+  }
+
+  document.getElementById('vocabSearch').addEventListener('input', (e) => {
+    const activeFilter = document.querySelector('.filter-btn.active')?.dataset.filter || 'all';
+    renderVocabList(activeFilter, e.target.value);
+  });
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderVocabList(btn.dataset.filter, document.getElementById('vocabSearch').value);
+    });
+  });
+
+  // ---------- QUIZ ----------
+  let quizIndex = 0;
+  let quizScore = 0;
+  let quizAnswered = false;
+
+  function initQuiz() {
+    document.getElementById('startQuiz').addEventListener('click', startQuiz);
+  }
+
+  function startQuiz() {
+    quizIndex = 0;
+    quizScore = 0;
+    quizAnswered = false;
+    showQuizQuestion();
+  }
+
+  function showQuizQuestion() {
+    if (quizIndex >= QUIZ.length) {
+      showQuizResult();
+      return;
+    }
+    const q = QUIZ[quizIndex];
+    const area = document.getElementById('quizArea');
+    area.innerHTML = `
+      <div class="quiz-card">
+        <p class="muted">Question ${quizIndex + 1} of ${QUIZ.length}</p>
+        <div class="quiz-q">${q.q}</div>
+        <div class="quiz-opts" id="quizOpts">
+          ${q.opts.map((o, i) => `<button class="quiz-opt" data-i="${i}">${o}</button>`).join('')}
+        </div>
+        <div class="quiz-feedback" id="quizFb"></div>
+        <div class="quiz-nav">
+          <button class="btn btn-secondary" id="quizNext" style="display:none">Next →</button>
+        </div>
+      </div>`;
+    area.querySelectorAll('.quiz-opt').forEach(btn => {
+      btn.addEventListener('click', () => selectAnswer(+btn.dataset.i));
+    });
+    document.getElementById('quizNext').addEventListener('click', () => {
+      quizIndex++;
+      showQuizQuestion();
+    });
+  }
+
+  function selectAnswer(i) {
+    if (quizAnswered) return;
+    quizAnswered = true;
+    const q = QUIZ[quizIndex];
+    const opts = document.querySelectorAll('.quiz-opt');
+    opts.forEach((o, idx) => {
+      o.classList.add(idx === q.ans ? 'correct' : (idx === i ? 'wrong' : ''));
+      o.disabled = true;
+    });
+    const fb = document.getElementById('quizFb');
+    if (i === q.ans) {
+      quizScore++;
+      fb.className = 'quiz-feedback show ok';
+      fb.textContent = '✓ Correct! ' + q.exp;
+    } else {
+      fb.className = 'quiz-feedback show bad';
+      fb.textContent = '✗ Wrong. ' + q.exp;
+    }
+    document.getElementById('quizNext').style.display = 'inline-flex';
+  }
+
+  function showQuizResult() {
+    const pct = Math.round((quizScore / QUIZ.length) * 100);
+    if (!progress.quizBest || pct > progress.quizBest) {
+      progress.quizBest = pct;
+      saveProgress();
+    }
+    updateDashboard();
+    document.getElementById('quizArea').innerHTML = `
+      <div class="quiz-score">
+        <h3>Quiz Complete!</h3>
+        <p class="num" style="font-size:2.5rem;color:var(--accent)">${quizScore}/${QUIZ.length}</p>
+        <p>${pct}%</p>
+        <p class="muted mt-2">Best score saved: ${progress.quizBest}%</p>
+        <button class="btn btn-primary mt-2" id="retryQuiz">Try Again</button>
+      </div>`;
+    document.getElementById('retryQuiz').addEventListener('click', startQuiz);
+  }
+
+  // ---------- PROGRESS & STORAGE ----------
+  function loadProgress() {
+    try {
+      return JSON.parse(localStorage.getItem('tq_progress') || '{}') || {
+        seenWords: [], savedWords: [], learnedWords: [],
+        readParas: [], quizBest: null, streak: 0, lastDate: null
+      };
+    } catch {
+      return { seenWords: [], savedWords: [], learnedWords: [], readParas: [], quizBest: null, streak: 0, lastDate: null };
+    }
+  }
+  function saveProgress() {
+    localStorage.setItem('tq_progress', JSON.stringify(progress));
+  }
+  function updateDashboard() {
+    document.getElementById('statWords').textContent = progress.learnedWords?.length || 0;
+    document.getElementById('statParas').textContent = progress.readParas?.length || 0;
+    const listenPct = Math.round(((progress.readParas?.length || 0) / PARAGRAPHS.length) * 100);
+    document.getElementById('statListen').textContent = listenPct + '%';
+    document.getElementById('statQuiz').textContent = progress.quizBest != null ? progress.quizBest + '%' : '—';
+    document.getElementById('statStreak').textContent = progress.streak || 0;
+  }
+
+  // ---------- SETTINGS ----------
+  function loadSettings() {
+    try {
+      return JSON.parse(localStorage.getItem('tq_settings') || '{}') || {
+        theme: 'light', fontSize: 17, lineHeight: 1.75,
+        bnSupport: true, vocabHighlight: true, autoScroll: true, reducedMotion: false
+      };
+    } catch {
+      return { theme: 'light', fontSize: 17, lineHeight: 1.75, bnSupport: true, vocabHighlight: true, autoScroll: true, reducedMotion: false };
+    }
+  }
+  function saveSettings() {
+    localStorage.setItem('tq_settings', JSON.stringify(settings));
+  }
+  function applySettings() {
+    document.documentElement.setAttribute('data-theme', settings.theme === 'light' ? '' : settings.theme);
+    if (settings.theme === 'light') document.documentElement.removeAttribute('data-theme');
+    else document.documentElement.setAttribute('data-theme', settings.theme);
+    document.documentElement.style.setProperty('--font-size', settings.fontSize + 'px');
+    document.documentElement.style.setProperty('--line-height', settings.lineHeight);
+    if (settings.reducedMotion) document.documentElement.style.setProperty('--motion', '0');
+  }
+
+  function initSettings() {
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        settings.theme = btn.dataset.theme;
+        document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        applySettings();
+        saveSettings();
+      });
+    });
+    document.getElementById('fontSize').addEventListener('input', (e) => {
+      settings.fontSize = +e.target.value;
+      applySettings();
+      saveSettings();
+    });
+    document.getElementById('lineHeight').addEventListener('input', (e) => {
+      settings.lineHeight = +e.target.value;
+      applySettings();
+      saveSettings();
+    });
+    document.getElementById('bnSupport').addEventListener('change', (e) => {
+      settings.bnSupport = e.target.checked;
+      saveSettings();
+    });
+    document.getElementById('vocabHighlight').addEventListener('change', (e) => {
+      settings.vocabHighlight = e.target.checked;
+      saveSettings();
+    });
+    document.getElementById('autoScroll').addEventListener('change', (e) => {
+      settings.autoScroll = e.target.checked;
+      saveSettings();
+    });
+    document.getElementById('reducedMotion').addEventListener('change', (e) => {
+      settings.reducedMotion = e.target.checked;
+      saveSettings();
+    });
+    document.getElementById('resetProgress').addEventListener('click', () => {
+      if (confirm('Reset all progress, saved words and quiz scores?')) {
+        progress = { seenWords: [], savedWords: [], learnedWords: [], readParas: [], quizBest: null, streak: 0, lastDate: null };
+        saveProgress();
+        updateDashboard();
+        renderVocabList();
+        alert('Progress reset.');
+      }
+    });
+  }
+
+  // ---------- SEARCH ----------
+  function initSearch() {
+    document.getElementById('globalSearch').addEventListener('input', (e) => {
+      const q = e.target.value.trim().toLowerCase();
+      const results = document.getElementById('searchResults');
+      if (!q) { results.innerHTML = ''; return; }
+      let html = '';
+      PARAGRAPHS.forEach((p, idx) => {
+        if (p.en.toLowerCase().includes(q) || p.bn.includes(q)) {
+          const snippet = p.en.substring(0, 120) + '…';
+          html += `<div class="search-hit" data-idx="${idx}"><strong>¶ ${idx + 1}</strong> ${snippet}</div>`;
+        }
+      });
+      Object.keys(VOCAB).forEach(key => {
+        const v = VOCAB[key];
+        if (key.includes(q) || v.bn.includes(q)) {
+          html += `<div class="search-hit" data-word="${key}"><strong>${key}</strong> — ${v.bn}</div>`;
+        }
+      });
+      results.innerHTML = html || '<p class="muted">No results.</p>';
+      results.querySelectorAll('.search-hit[data-idx]').forEach(h => {
+        h.addEventListener('click', () => {
+          showSection('read');
+          setTimeout(() => {
+            const el = document.getElementById(PARAGRAPHS[h.dataset.idx].id);
+            if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 100);
+        });
+      });
+    });
+  }
+
+  // ---------- BOOKMARKS ----------
+  function initBookmarks() {
+    // handled in render
+  }
+  function toggleBookmark(idx) {
+    const id = PARAGRAPHS[idx].id;
+    if (!progress.bookmarks) progress.bookmarks = [];
+    if (progress.bookmarks.includes(id)) {
+      progress.bookmarks = progress.bookmarks.filter(b => b !== id);
+    } else {
+      progress.bookmarks.push(id);
+    }
+    saveProgress();
+    renderBookmarks();
+  }
+  function renderBookmarks() {
+    const list = document.getElementById('bookmarksList');
+    if (!progress.bookmarks || !progress.bookmarks.length) {
+      list.innerHTML = '<p class="muted">No bookmarks yet. Tap 🔖 on any paragraph while reading.</p>';
+      return;
+    }
+    list.innerHTML = progress.bookmarks.map(id => {
+      const idx = PARAGRAPHS.findIndex(p => p.id === id);
+      const p = PARAGRAPHS[idx];
+      return `<div class="search-hit" data-idx="${idx}"><strong>¶ ${idx + 1}</strong> ${p.en.substring(0, 100)}…</div>`;
+    }).join('');
+    list.querySelectorAll('.search-hit').forEach(h => {
+      h.addEventListener('click', () => {
+        showSection('read');
+        setTimeout(() => {
+          document.getElementById(PARAGRAPHS[h.dataset.idx].id)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      });
+    });
+  }
+
+  // ---------- PARTICLES (landing) ----------
+  function initParticles() {
+    const container = document.getElementById('particles');
+    if (!container || settings.reducedMotion) return;
+    for (let i = 0; i < 20; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.left = Math.random() * 100 + '%';
+      p.style.animationDelay = Math.random() * 8 + 's';
+      p.style.animationDuration = (6 + Math.random() * 6) + 's';
+      container.appendChild(p);
+    }
+  }
+
+  // ---------- SERVICE WORKER ----------
+  function registerSW() {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./sw.js').catch(() => {});
+    }
+  }
+
+  // ---------- START ----------
+  document.addEventListener('DOMContentLoaded', initApp);
+})();
+</script>
+</body>
+</html>
