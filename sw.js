@@ -1,17 +1,17 @@
-const CACHE_NAME = 'three-questions-v1.0.0';
+const CACHE_NAME = 'three-questions-v1.1.0';
 const ASSETS = [
   './',
   './index.html',
-  './manifest.json'
+  './manifest.json',
+  './chunk0.b64',
+  './chunk1.b64',
+  './chunk2.b64',
+  './chunk3.b64'
 ];
-
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
-  );
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS)));
   self.skipWaiting();
 });
-
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
@@ -20,7 +20,6 @@ self.addEventListener('activate', (event) => {
   );
   self.clients.claim();
 });
-
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cached) => {
